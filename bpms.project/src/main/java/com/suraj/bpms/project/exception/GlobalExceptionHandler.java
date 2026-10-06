@@ -31,4 +31,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleProcessInstanceNotFoundException(ProcessInstanceNotFoundException ex){
         return new ResponseEntity<>(ex.getMessage() , HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<String> handleTaskNotFoundException(TaskNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }
