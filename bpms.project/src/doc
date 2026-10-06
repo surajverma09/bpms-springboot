@@ -1,0 +1,516 @@
+Absolutely. Here is the **clean copy-paste version** for your project documentation.
+
+````markdown
+# BPMS Database Schema
+
+## 1. roles
+
+### Purpose
+
+Stores the roles available in the BPMS.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Unique role identifier |
+| name | VARCHAR(50) | NOT NULL, UNIQUE | Name of the role |
+
+### Initial Roles
+
+- ADMIN
+- MANAGER
+- HR
+- EMPLOYEE
+
+
+## 2. users
+
+### Purpose
+
+Stores the users who interact with the BPMS.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Unique user identifier |
+| name | VARCHAR(100) | NOT NULL | User's full name |
+| email | VARCHAR(150) | NOT NULL, UNIQUE | User's login/contact email |
+| password | VARCHAR(255) | NOT NULL | Hashed user password |
+| role_id | BIGINT | NOT NULL, FOREIGN KEY | Role assigned to the user |
+| created_at | TIMESTAMP | NOT NULL | User creation time |
+| updated_at | TIMESTAMP | NOT NULL | Last update time |
+
+### Foreign Key
+
+`users.role_id` references `roles.id`.
+
+### Relationship
+
+- One role can have many users.
+- Many users can have one role.
+
+```text
+roles
+  1
+  |
+  |
+  N
+users
+````
+
+## 3. processes
+
+### Purpose
+
+Stores the business processes or workflows managed by the BPMS.
+
+### Columns
+
+| Column      | Data Type    | Constraints                 | Description                  |
+| ----------- | ------------ | --------------------------- | ---------------------------- |
+| id          | BIGINT       | PRIMARY KEY, AUTO_INCREMENT | Unique process identifier    |
+| name        | VARCHAR(150) | NOT NULL                    | Name of the business process |
+| description | TEXT         | NULL                        | Description of the process   |
+| created_by  | BIGINT       | NOT NULL, FOREIGN KEY       | User who created the process |
+| created_at  | TIMESTAMP    | NOT NULL                    | Process creation time        |
+| updated_at  | TIMESTAMP    | NOT NULL                    | Last update time             |
+
+### Foreign Key
+
+`processes.created_by` references `users.id`.
+
+### Relationship
+
+* One user can create many processes.
+* Each process is created by one user.
+
+```text
+users
+  1
+  |
+  |
+  N
+processes
+```
+
+## 4. tasks
+
+### Purpose
+
+Stores the individual tasks that belong to a business process.
+
+### Columns
+
+| Column      | Data Type    | Constraints                 | Description                       |
+| ----------- | ------------ | --------------------------- | --------------------------------- |
+| id          | BIGINT       | PRIMARY KEY, AUTO_INCREMENT | Unique task identifier            |
+| process_id  | BIGINT       | NOT NULL, FOREIGN KEY       | Process to which the task belongs |
+| name        | VARCHAR(150) | NOT NULL                    | Name of the task                  |
+| description | TEXT         | NULL                        | Description of the task           |
+| status      | VARCHAR(30)  | NOT NULL                    | Current status of the task        |
+| assigned_to | BIGINT       | NULL, FOREIGN KEY           | User responsible for the task     |
+| created_at  | TIMESTAMP    | NOT NULL                    | Task creation time                |
+| updated_at  | TIMESTAMP    | NOT NULL                    | Last update time                  |
+
+### Foreign Keys
+
+* `tasks.process_id` references `processes.id`.
+* `tasks.assigned_to` references `users.id`.
+
+### Relationships
+
+* One process can have many tasks.
+* Each task belongs to one process.
+* One user can be assigned many tasks.
+* A task can be unassigned.
+
+```text
+processes
+    1
+    |
+    |
+    N
+  tasks
+```
+
+```text
+users
+  1
+  |
+  |
+  N
+tasks
+```
+
+## Task Status Values
+
+The task status can have the following values:
+
+* PENDING
+* IN_PROGRESS
+* COMPLETED
+* CANCELLED
+
+# Complete Database Relationship
+
+```text
+                         ┌──────────────────┐
+                         │      roles       │
+                         ├──────────────────┤
+                         │ id PK            │
+                         │ name UNIQUE      │
+                         └────────┬─────────┘
+                                  │
+                                  │ 1
+                                  │
+                                  │ N
+                         ┌────────▼─────────┐
+                         │      users       │
+                         ├──────────────────┤
+                         │ id PK            │
+                         │ name             │
+                         │ email UNIQUE     │
+                         │ password         │
+                         │ role_id FK       │
+                         │ created_at       │
+                         │ updated_at       │
+                         └───────┬─────┬────┘
+                                 │     │
+                              1:N│     │1:N
+                                 │     │
+                    ┌────────────▼─┐   │
+                    │   processes  │   │
+                    ├──────────────┤   │
+                    │ id PK        │   │
+                    │ name         │   │
+                    │ description  │   │
+                    │ created_by FK│   │
+                    │ created_at   │   │
+                    │ updated_at   │   │
+                    └───────┬──────┘   │
+                            │           │
+                         1:N│           │
+                            │           │
+                     ┌──────▼───────────▼─┐
+                     │       tasks        │
+                     ├────────────────────┤
+                     │ id PK              │
+                     │ process_id FK      │
+                     │ name               │
+                     │ description        │
+                     │ status             │
+                     │ assigned_to FK     │
+                     │ created_at         │
+                     │ updated_at         │
+                     └────────────────────┘
+
+
+# Relationships Summary
+
+| Parent Table | Child Table | Relationship | Foreign Key |
+|---|---|---|---|
+| roles | users | One-to-Many | users.role_id |
+| users | processes | One-to-Many | processes.created_by |
+| processes | tasks | One-to-Many | tasks.process_id |
+| users | tasks | One-to-Many | tasks.assigned_to |
+```
+
+**This is the version you can keep as your `database-schema.md` documentation.**
+
+## 3. processes
+
+### Purpose
+
+Stores the business workflows managed by the BPMS.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY | Unique identifier for the process |
+| name | VARCHAR(150) | NOT NULL, UNIQUE | Name of the business process |
+| description | VARCHAR(500) | NULL | Description of the process |
+| status | VARCHAR(30) | NOT NULL | Current status of the process |
+| created_at | TIMESTAMP | NOT NULL | Process creation time |
+| updated_at | TIMESTAMP | NOT NULL | Last update time |
+
+### Initial Status Values
+
+- ACTIVE
+- INACTIVE
+
+
+Process: Employee Leave Request
+
+        ┌──────────────────────────┐
+Step 1  │ Manager Approval         │
+        └────────────┬─────────────┘
+                     ↓
+        ┌──────────────────────────┐
+Step 2  │ HR Verification           │
+        └────────────┬─────────────┘
+                     ↓
+        ┌──────────────────────────┐
+Step 3  │ Complete                 │
+        └──────────────────────────┘
+
+
+## 4. process_steps
+
+### Purpose
+
+Stores the individual stages of a business process and defines the order in which they should be executed.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY | Unique identifier for the process step |
+| process_id | BIGINT | NOT NULL, FOREIGN KEY | Process to which the step belongs |
+| step_name | VARCHAR(150) | NOT NULL | Name of the workflow step |
+| step_order | INT | NOT NULL | Defines the execution order |
+| required_role | VARCHAR(50) | NOT NULL | Role responsible for handling the step |
+
+### Relationship
+
+- One process can contain many process steps.
+- `process_steps.process_id` references `processes.id`.
+
+```text
+processes
+    1
+    |
+    | N
+    ▼
+process_steps
+
+
+## 5. tasks
+
+### Purpose
+
+Stores the actual work items generated from process steps and assigned to users for execution.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY | Unique identifier for the task |
+| process_id | BIGINT | NOT NULL, FOREIGN KEY | Process associated with the task |
+| process_step_id | BIGINT | NOT NULL, FOREIGN KEY | Current process step |
+| assigned_to | BIGINT | NOT NULL, FOREIGN KEY | User responsible for the task |
+| status | VARCHAR(30) | NOT NULL | Current status of the task |
+| created_at | TIMESTAMP | NOT NULL | Task creation time |
+| updated_at | TIMESTAMP | NOT NULL | Last update time |
+
+### Relationships
+
+- Many tasks can belong to one process.
+- Many tasks can belong to one process step.
+- Many tasks can be assigned to one user.
+
+```text
+processes
+    1
+    |
+    | N
+    ▼
+  tasks
+
+process_steps
+    1
+    |
+    | N
+    ▼
+  tasks
+
+users
+    1
+    |
+    | N
+    ▼
+  tasks
+
+## 6. approvals
+
+### Purpose
+
+Stores the decisions made by users while processing tasks.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY | Unique identifier for the approval |
+| task_id | BIGINT | NOT NULL, FOREIGN KEY | Task associated with the approval |
+| approved_by | BIGINT | NOT NULL, FOREIGN KEY | User who made the decision |
+| decision | VARCHAR(30) | NOT NULL | Decision made on the task |
+| comment | VARCHAR(500) | NULL | Optional comment explaining the decision |
+| created_at | TIMESTAMP | NOT NULL | Time when the decision was recorded |
+
+### Relationships
+
+- One task can have multiple approval/action records.
+- One user can make many approval decisions.
+- `approvals.task_id` references `tasks.id`.
+- `approvals.approved_by` references `users.id`.
+
+```text
+tasks
+  1
+  |
+  | N
+  ▼
+approvals
+
+users
+  1
+  |
+  | N
+  ▼
+approvals
+
+## 7. notifications
+
+### Purpose
+
+Stores notifications that are generated for users when important events occur in the BPMS.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY | Unique identifier for the notification |
+| user_id | BIGINT | NOT NULL, FOREIGN KEY | User who receives the notification |
+| message | VARCHAR(500) | NOT NULL | Notification message |
+| is_read | BOOLEAN | NOT NULL | Indicates whether the notification has been read |
+| created_at | TIMESTAMP | NOT NULL | Time when the notification was created |
+
+### Relationship
+
+- One user can receive many notifications.
+- `notifications.user_id` references `users.id`.
+
+```text
+users
+  1
+  |
+  | N
+  ▼
+notifications
+
+## 8. audit_logs
+
+### Purpose
+
+Stores a record of important actions performed by users in the BPMS for tracking and auditing purposes.
+
+### Columns
+
+| Column | Data Type | Constraints | Description |
+|---|---|---|---|
+| id | BIGINT | PRIMARY KEY | Unique identifier for the audit log |
+| user_id | BIGINT | NOT NULL, FOREIGN KEY | User who performed the action |
+| action | VARCHAR(100) | NOT NULL | Action performed |
+| entity_type | VARCHAR(50) | NOT NULL | Type of entity affected |
+| entity_id | BIGINT | NOT NULL | ID of the affected entity |
+| created_at | TIMESTAMP | NOT NULL | Time when the action occurred |
+
+### Relationship
+
+- One user can generate many audit log records.
+- `audit_logs.user_id` references `users.id`.
+
+```text
+users
+  1
+  |
+  | N
+  ▼
+audit_logs
+
+---------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE roles (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE users (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+CREATE TABLE processes (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(150) UNIQUE NOT NULL,
+  description VARCHAR(500),
+  status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE process_steps (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  process_id BIGINT NOT NULL,
+  step_name VARCHAR(150) NOT NULL,
+  step_order INT NOT NULL,
+  required_role VARCHAR(50) NOT NULL,
+  FOREIGN KEY (process_id) REFERENCES processes(id)
+);
+
+-- THIS IS THE MISSING TABLE - ADD THIS
+CREATE TABLE process_instances (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  process_id BIGINT NOT NULL,
+  started_by BIGINT NOT NULL,
+  current_step_id BIGINT,
+  status VARCHAR(30) NOT NULL DEFAULT 'RUNNING',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (process_id) REFERENCES processes(id),
+  FOREIGN KEY (started_by) REFERENCES users(id)
+);
+
+CREATE TABLE tasks (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  process_instance_id BIGINT NOT NULL,
+  process_step_id BIGINT NOT NULL,
+  assigned_to BIGINT NOT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (process_instance_id) REFERENCES process_instances(id),
+  FOREIGN KEY (process_step_id) REFERENCES process_steps(id),
+  FOREIGN KEY (assigned_to) REFERENCES users(id)
+);
+
+CREATE TABLE approvals (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  task_id BIGINT NOT NULL,
+  approved_by BIGINT NOT NULL,
+  decision VARCHAR(30) NOT NULL, -- APPROVED / REJECTED
+  comment VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (task_id) REFERENCES tasks(id),
+  FOREIGN KEY (approved_by) REFERENCES users(id)
+);
+
+CREATE TABLE audit_logs (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  entity_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+-- notifications table you can add later, not needed for MVP
+
+ @Id
+    private int id;
+    private String name;
