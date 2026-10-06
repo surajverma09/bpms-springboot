@@ -27,4 +27,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(ProcessInstanceNotFoundException.class)
+    public ResponseEntity<String> handleProcessInstanceNotFoundException(ProcessInstanceNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage() , HttpStatus.NOT_FOUND);
+    }
 }
