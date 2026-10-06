@@ -18,4 +18,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleProcessDefinitionNotFound(ProcessDefinitionNotFoundException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(ProcessStepNotFoundException.class)
+    public ResponseEntity<String> handleProcessStepNotFound(ProcessStepNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }
