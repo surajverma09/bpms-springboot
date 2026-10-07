@@ -39,4 +39,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleTaskActionNotFoundException(TaskActionNotFoundException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<String> handleNotificationNotFoundException(NotificationNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }
