@@ -2,10 +2,7 @@ package com.suraj.bpms.project.controller;
 
 import com.suraj.bpms.project.entity.TaskAction;
 import com.suraj.bpms.project.service.TaskActionService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,5 +24,12 @@ public class TaskActionController {
     @GetMapping("/{id}")
     public TaskAction getTaskActionById(@PathVariable Long id){
         return taskActionService.getTaskActionById(id);
+    }
+
+    @PostMapping("/{taskId}/{userId}")
+    public TaskAction createTaskAction(@PathVariable Long taskId,
+                                       @PathVariable Long userId,
+                                       @RequestBody TaskAction taskAction){
+        return taskActionService.createTaskAction(taskId, userId, taskAction);
     }
 }
