@@ -43,4 +43,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNotificationNotFoundException(NotificationNotFoundException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(AuditLogNotFoundException.class)
+    public ResponseEntity<String> handleAuditLogNotFoundException(AuditLogNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+    }
 }
