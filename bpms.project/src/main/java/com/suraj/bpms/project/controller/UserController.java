@@ -1,8 +1,13 @@
 package com.suraj.bpms.project.controller;
 
-import com.suraj.bpms.project.entity.User;
-import com.suraj.bpms.project.repository.UserRepository;
+import com.suraj.bpms.project.dto.ApiResponse;
+import com.suraj.bpms.project.dto.user.UserCreateDTO;
+import com.suraj.bpms.project.dto.user.UserResponseDTO;
+import com.suraj.bpms.project.dto.user.UserUpdateDTO;
 import com.suraj.bpms.project.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,28 +23,31 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public ResponseEntity<ApiResponse> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO) {
+         userService.createUser(userCreateDTO);
+         return new ResponseEntity<>(new ApiResponse("User created successfully"), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return new ResponseEntity<>(userService.getAllUsers(),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public User getUserId(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateUser(user, id);
+    public ResponseEntity<ApiResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        userService.updateUser(userUpdateDTO, id);
+        return new  ResponseEntity<>(new ApiResponse("User updated succcessfully"), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long id) {
         userService.softDelete(id);
-        return "User Deleted Successfully";
+        return new ResponseEntity<>(new ApiResponse("User deleted successfully"), HttpStatus.OK
+        );
     }
 }
