@@ -12,10 +12,12 @@ import com.suraj.bpms.project.repository.NotificationRepository;
 import com.suraj.bpms.project.repository.ProcessInstanceRepository;
 import com.suraj.bpms.project.repository.TaskRepository;
 import com.suraj.bpms.project.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class NotificationService {
 
@@ -24,16 +26,6 @@ public class NotificationService {
     private final ProcessInstanceRepository processInstanceRepository;
     private final TaskRepository taskRepository;
 
-    public NotificationService(NotificationRepository notificationRepository,
-                               UserRepository userRepository,
-                               ProcessInstanceRepository processInstanceRepository,
-                               TaskRepository taskRepository) {
-
-                                this.notificationRepository = notificationRepository;
-                                this.userRepository = userRepository;
-                                this.processInstanceRepository = processInstanceRepository;
-                                this.taskRepository = taskRepository;
-    }
 
     public List<Notification> getAllNotification(){
         return notificationRepository.findAll();

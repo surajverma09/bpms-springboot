@@ -1,6 +1,6 @@
 package com.suraj.bpms.project.mapper;
 
-import com.suraj.bpms.project.dto.user.RoleResponseDTO;
+import com.suraj.bpms.project.dto.role.RoleResponseDTO;
 import com.suraj.bpms.project.dto.user.UserCreateDTO;
 import com.suraj.bpms.project.dto.user.UserResponseDTO;
 import com.suraj.bpms.project.entity.Role;

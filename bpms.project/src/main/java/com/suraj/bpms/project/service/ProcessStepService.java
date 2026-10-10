@@ -4,10 +4,12 @@ import com.suraj.bpms.project.entity.*;
 import com.suraj.bpms.project.exception.*;
 import com.suraj.bpms.project.repository.*;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class ProcessStepService {
 
@@ -15,13 +17,6 @@ public class ProcessStepService {
     private final RoleRepository roleRepository;
     private final ProcessDefinitionRepository processDefinitionRepository;
 
-    public ProcessStepService(ProcessStepRepository processStepRepository,
-                              RoleRepository roleRepository,
-                              ProcessDefinitionRepository processDefinitionRepository) {
-        this.processStepRepository = processStepRepository;
-        this.roleRepository = roleRepository;
-        this.processDefinitionRepository = processDefinitionRepository;
-    }
 
     public List<ProcessStep> getAllProcessStep(){
         return processStepRepository.findAll();

@@ -6,21 +6,17 @@ import com.suraj.bpms.project.exception.AuditLogNotFoundException;
 import com.suraj.bpms.project.exception.UserNotFoundException;
 import com.suraj.bpms.project.repository.AuditLogRepository;
 import com.suraj.bpms.project.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
     private final UserRepository userRepository;
-
-    public AuditLogService(AuditLogRepository auditLogRepository,
-                           UserRepository userRepository){
-        this.auditLogRepository = auditLogRepository;
-        this.userRepository = userRepository;
-    }
 
     public List<AuditLog> getAllAuditLogs(){
         return auditLogRepository.findAll();

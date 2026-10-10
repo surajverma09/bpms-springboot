@@ -2,10 +2,12 @@ package com.suraj.bpms.project.controller;
 
 import com.suraj.bpms.project.entity.ProcessInstance;
 import com.suraj.bpms.project.service.ProcessInstanceService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/process-instance")
 
@@ -13,9 +15,6 @@ public class ProcessInstanceController {
 
     private final ProcessInstanceService processInstanceService;
 
-    public ProcessInstanceController(ProcessInstanceService processInstanceService){
-        this.processInstanceService = processInstanceService;
-    }
 
     @GetMapping
     public List<ProcessInstance> getAllProcessInstances(){

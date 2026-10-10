@@ -10,11 +10,13 @@ import com.suraj.bpms.project.exception.UserNotFoundException;
 import com.suraj.bpms.project.mapper.UserMapper;
 import com.suraj.bpms.project.repository.RoleRepository;
 import com.suraj.bpms.project.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class UserService {
 
@@ -23,17 +25,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       RoleRepository roleRepository,
-                       UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
-        this.userMapper = userMapper;
-    }
-
-    public User createUser(UserCreateDTO userCreateDTO) {
+    public void createUser(UserCreateDTO userCreateDTO) {
 
         Long roleId = userCreateDTO.getRoleId();
 
@@ -44,7 +36,7 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public List<UserResponseDTO> getAllUsers() {

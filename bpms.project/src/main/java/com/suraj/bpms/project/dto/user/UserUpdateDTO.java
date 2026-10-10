@@ -1,7 +1,12 @@
 package com.suraj.bpms.project.dto.user;
 
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class UserUpdateDTO  {
 
     @NotBlank
@@ -19,27 +24,4 @@ public class UserUpdateDTO  {
     @NotNull
     private Long roleId;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Long getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
-    }
 }

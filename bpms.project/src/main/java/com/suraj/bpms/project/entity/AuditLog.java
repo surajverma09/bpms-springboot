@@ -1,9 +1,15 @@
 package com.suraj.bpms.project.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import java.sql.Timestamp;
 
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "audit_log")
 public class AuditLog {
@@ -31,78 +37,4 @@ public class AuditLog {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
     private Timestamp createdAt;
-
-    public AuditLog() {
-    }
-
-    public AuditLog(Long id, User user,
-                    String action,
-                    String entityType,
-                    Long entityId,
-                    String details,
-                    Timestamp createdAt) {
-        this.id = id;
-        this.user = user;
-        this.action = action;
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.details = details;
-        this.createdAt = createdAt;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public String getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
-    }
-
-    public Long getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
 }

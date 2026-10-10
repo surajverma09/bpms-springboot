@@ -2,19 +2,18 @@ package com.suraj.bpms.project.controller;
 
 import com.suraj.bpms.project.entity.Notification;
 import com.suraj.bpms.project.service.NotificationService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/notification")
 public class NotificationController {
 
     private final NotificationService notificationService;
 
-    public NotificationController(NotificationService notificationService){
-        this.notificationService = notificationService;
-    }
 
     @GetMapping
     public List<Notification> getAllNotification(){

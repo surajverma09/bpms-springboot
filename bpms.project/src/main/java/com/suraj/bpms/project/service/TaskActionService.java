@@ -9,10 +9,12 @@ import com.suraj.bpms.project.exception.UserNotFoundException;
 import com.suraj.bpms.project.repository.TaskActionRepository;
 import com.suraj.bpms.project.repository.TaskRepository;
 import com.suraj.bpms.project.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class TaskActionService {
 
@@ -20,14 +22,6 @@ public class TaskActionService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
-    public TaskActionService(TaskActionRepository taskActionRepository,
-                             TaskRepository taskRepository,
-                             UserRepository userRepository) {
-
-                            this.taskActionRepository = taskActionRepository;
-                            this.taskRepository = taskRepository;
-                            this.userRepository = userRepository;
-    }
 
     public List<TaskAction> getAllTaskAction(){
         return taskActionRepository.findAll();

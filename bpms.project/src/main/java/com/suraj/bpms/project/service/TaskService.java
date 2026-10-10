@@ -3,10 +3,12 @@ package com.suraj.bpms.project.service;
 import com.suraj.bpms.project.entity.*;
 import com.suraj.bpms.project.exception.TaskNotFoundException;
 import com.suraj.bpms.project.repository.*;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class TaskService {
 
@@ -15,13 +17,6 @@ public class TaskService {
     private final ProcessStepRepository processStepRepository;
     private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository, ProcessInstanceRepository processInstanceRepository,
-                       ProcessStepRepository processStepRepository, UserRepository userRepository) {
-        this.taskRepository = taskRepository;
-        this.processInstanceRepository = processInstanceRepository;
-        this.processStepRepository = processStepRepository;
-        this.userRepository = userRepository;
-    }
 
     public List<Task> getAllTask(){
         return taskRepository.findAll();

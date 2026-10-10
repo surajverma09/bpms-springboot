@@ -1,7 +1,15 @@
 package com.suraj.bpms.project.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "process_step")
 public class ProcessStep {
@@ -23,53 +31,4 @@ public class ProcessStep {
 
     @Column(nullable = false)
     private Integer stepOrder;
-
-    public ProcessStep(Long id, ProcessDefinition processDefinition, Role assignedRole, String stepName, Integer stepOrder) {
-        this.id = id;
-        this.processDefinition = processDefinition;
-        this.assignedRole = assignedRole;
-        this.stepName = stepName;
-        this.stepOrder = stepOrder;
-    }
-    public ProcessStep(){}
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public ProcessDefinition getProcessDefinition() {
-        return processDefinition;
-    }
-
-    public void setProcessDefinition(ProcessDefinition processDefinition) {
-        this.processDefinition = processDefinition;
-    }
-
-    public Role getAssignedRole() {
-        return assignedRole;
-    }
-
-    public void setAssignedRole(Role assignedRole) {
-        this.assignedRole = assignedRole;
-    }
-
-    public String getStepName() {
-        return stepName;
-    }
-
-    public void setStepName(String stepName) {
-        this.stepName = stepName;
-    }
-
-    public Integer getStepOrder() {
-        return stepOrder;
-    }
-
-    public void setStepOrder(Integer stepOrder) {
-        this.stepOrder = stepOrder;
-    }
 }

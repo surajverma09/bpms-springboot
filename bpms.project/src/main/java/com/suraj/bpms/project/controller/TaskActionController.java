@@ -2,19 +2,17 @@ package com.suraj.bpms.project.controller;
 
 import com.suraj.bpms.project.entity.TaskAction;
 import com.suraj.bpms.project.service.TaskActionService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/task-action")
 public class TaskActionController {
 
     private final TaskActionService taskActionService;
-
-    public TaskActionController(TaskActionService taskActionService){
-        this.taskActionService = taskActionService;
-    }
 
     @GetMapping
     public List<TaskAction> getAllTaskAction(){

@@ -9,10 +9,12 @@ import com.suraj.bpms.project.exception.UserNotFoundException;
 import com.suraj.bpms.project.repository.ProcessDefinitionRepository;
 import com.suraj.bpms.project.repository.ProcessInstanceRepository;
 import com.suraj.bpms.project.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class ProcessInstanceService {
 
@@ -20,11 +22,6 @@ public class ProcessInstanceService {
     private final ProcessDefinitionRepository processDefinitionRepository;
     private final UserRepository userRepository;
 
-    public ProcessInstanceService(ProcessInstanceRepository processInstanceRepository, ProcessDefinitionRepository processDefinitionRepository, UserRepository userRepository){
-        this.processInstanceRepository = processInstanceRepository;
-        this.processDefinitionRepository = processDefinitionRepository;
-        this.userRepository = userRepository;
-    }
 
     public List<ProcessInstance> getAllProcessInstances(){
         return processInstanceRepository.findAll();
