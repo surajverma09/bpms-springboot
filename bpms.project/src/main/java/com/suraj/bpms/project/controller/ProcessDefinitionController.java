@@ -1,6 +1,6 @@
 package com.suraj.bpms.project.controller;
 
-import com.suraj.bpms.project.dto.ApiResponse;
+import com.suraj.bpms.project.response.ApiResponse;
 import com.suraj.bpms.project.dto.processdefinition.ProcessDefinitionCreateDTO;
 import com.suraj.bpms.project.dto.processdefinition.ProcessDefinitionResponseDTO;
 import com.suraj.bpms.project.service.ProcessDefinitionService;

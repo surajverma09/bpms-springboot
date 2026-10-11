@@ -1,35 +1,46 @@
 package com.suraj.bpms.project.service;
 
+import com.suraj.bpms.project.dto.processstep.ProcessStepCreateDTO;
+import com.suraj.bpms.project.dto.processstep.ProcessStepResponseDTO;
 import com.suraj.bpms.project.entity.*;
 import com.suraj.bpms.project.exception.*;
+import com.suraj.bpms.project.mapper.ProcessStepMapper;
 import com.suraj.bpms.project.repository.*;
-
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class ProcessStepService {
 
     private final ProcessStepRepository processStepRepository;
     private final RoleRepository roleRepository;
     private final ProcessDefinitionRepository processDefinitionRepository;
+    private final ProcessStepMapper processStepMapper;
 
 
-    public List<ProcessStep> getAllProcessStep(){
-        return processStepRepository.findAll();
+    public List<ProcessStepResponseDTO> getAllProcessStep(){
+        return processStepRepository.findAll()
+                .stream()
+                .map(processStepMapper::toProcessStepResponseDto)
+                .toList();
     }
 
-    public ProcessStep getProcessStepById(Long id){
-        return processStepRepository.findById(id)
-                .orElseThrow(()-> new ProcessStepNotFoundException("Process step not found with this id : " + id));
+    public ProcessStepResponseDTO getProcessStepById(Long id){
+        ProcessStep processStep =  processStepRepository.findById(id)
+                .orElseThrow(()-> new
+                        ProcessStepNotFoundException("Process step not found with this id : " + id));
+
+        return processStepMapper.toProcessStepResponseDto(processStep);
     }
 
-    public ProcessStep createProcessStep(Long processDefinitionId,
+    public ProcessStepResponseDTO createProcessStep(Long processDefinitionId,
                                          Long roleId,
-                                         ProcessStep processStep){
+                                         ProcessStepCreateDTO processStepCreateDTO){
+
+        ProcessStep processStep = processStepMapper.toProcessStepEntity(processStepCreateDTO);
 
         ProcessDefinition processDefinition = processDefinitionRepository.findById(processDefinitionId)
                 .orElseThrow(()-> new ProcessDefinitionNotFoundException
@@ -42,6 +53,9 @@ public class ProcessStepService {
         processStep.setProcessDefinition(processDefinition);
         processStep.setAssignedRole(role);
 
-        return processStepRepository.save(processStep);
+
+
+        ProcessStep savedProcessStep =  processStepRepository.save(processStep);
+        return processStepMapper.toProcessStepResponseDto(savedProcessStep);
     }
 }

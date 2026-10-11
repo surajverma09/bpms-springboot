@@ -1,5 +1,4 @@
 package com.suraj.bpms.project;
-import com.suraj.bpms.project.repository.RoleRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

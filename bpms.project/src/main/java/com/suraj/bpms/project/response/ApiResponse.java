@@ -1,4 +1,4 @@
-package com.suraj.bpms.project.dto;
+package com.suraj.bpms.project.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

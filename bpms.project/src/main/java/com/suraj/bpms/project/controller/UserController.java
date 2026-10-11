@@ -1,6 +1,6 @@
 package com.suraj.bpms.project.controller;
 
-import com.suraj.bpms.project.dto.ApiResponse;
+import com.suraj.bpms.project.response.ApiResponse;
 import com.suraj.bpms.project.dto.user.UserCreateDTO;
 import com.suraj.bpms.project.dto.user.UserResponseDTO;
 import com.suraj.bpms.project.dto.user.UserUpdateDTO;
