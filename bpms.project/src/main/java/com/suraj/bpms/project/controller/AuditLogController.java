@@ -1,8 +1,13 @@
 package com.suraj.bpms.project.controller;
 
-import com.suraj.bpms.project.entity.AuditLog;
+import com.suraj.bpms.project.dto.auditlog.AuditLogCreateDTO;
+import com.suraj.bpms.project.dto.auditlog.AuditLogResponseDTO;
+import com.suraj.bpms.project.response.ApiResponse;
 import com.suraj.bpms.project.service.AuditLogService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,17 +19,18 @@ public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
-    @PostMapping("/{userId}")
-    public AuditLog createAuditLog(@PathVariable Long userId,
-                                   @RequestBody AuditLog auditLog){
-        return auditLogService.createAuditLog(userId, auditLog);
+    @PostMapping
+    public ResponseEntity<ApiResponse> createAuditLog(@Valid @RequestBody AuditLogCreateDTO auditLogCreateDTO){
+        auditLogService.createAuditLog(auditLogCreateDTO);
+        return new ResponseEntity<>(new ApiResponse("Audit log created successfully"), HttpStatus.CREATED);
     }
+
     @GetMapping("/{id}")
-    public AuditLog getAuditLogById(@PathVariable Long id){
+    public AuditLogResponseDTO getAuditLogById(@PathVariable Long id){
         return auditLogService.getAuditLogById(id);
     }
     @GetMapping()
-    public List<AuditLog> getAllAudit(){
+    public List<AuditLogResponseDTO> getAllAudit(){
         return auditLogService.getAllAuditLogs();
     }
 }
