@@ -1,5 +1,7 @@
 package com.suraj.bpms.project.service;
 
+import com.suraj.bpms.project.dto.notification.NotificationCreateDTO;
+import com.suraj.bpms.project.dto.notification.NotificationResponseDTO;
 import com.suraj.bpms.project.entity.Notification;
 import com.suraj.bpms.project.entity.ProcessInstance;
 import com.suraj.bpms.project.entity.Task;
@@ -8,6 +10,7 @@ import com.suraj.bpms.project.exception.NotificationNotFoundException;
 import com.suraj.bpms.project.exception.ProcessInstanceNotFoundException;
 import com.suraj.bpms.project.exception.TaskNotFoundException;
 import com.suraj.bpms.project.exception.UserNotFoundException;
+import com.suraj.bpms.project.mapper.NotificationMapper;
 import com.suraj.bpms.project.repository.NotificationRepository;
 import com.suraj.bpms.project.repository.ProcessInstanceRepository;
 import com.suraj.bpms.project.repository.TaskRepository;
@@ -25,39 +28,50 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final ProcessInstanceRepository processInstanceRepository;
     private final TaskRepository taskRepository;
+    private final NotificationMapper notificationMapper;
 
 
-    public List<Notification> getAllNotification(){
-        return notificationRepository.findAll();
+    public List<NotificationResponseDTO> getAllNotification(){
+        return notificationRepository.findAll()
+                .stream()
+                .map(notificationMapper::toNotificationResponseDTO)
+                .toList();
     }
 
-    public Notification getNotificationById(Long id){
-        return notificationRepository.findById(id)
+    public NotificationResponseDTO getNotificationById(Long id){
+        Notification notification =  notificationRepository.findById(id)
                 .orElseThrow(()-> new NotificationNotFoundException
                         ("Notification is not found with this id : "+ id));
 
+        return notificationMapper.toNotificationResponseDTO(notification);
+
     }
 
-    public Notification createNotification(Long userId, Long processInstanceId,
-                                           Long taskId, Notification notification){
+    public NotificationResponseDTO createNotification(NotificationCreateDTO notificationCreateDTO){
 
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(()->new UserNotFoundException("User is not found with this id :" + userId));
+        Notification notification = notificationMapper.toNotificationEntity(notificationCreateDTO);
 
-        ProcessInstance processInstance = processInstanceRepository.findById(processInstanceId)
+        User user = userRepository.findByIdAndIsDeletedFalse(notificationCreateDTO.getUserId())
+                .orElseThrow(()->new UserNotFoundException("User is not found with this id :" + notificationCreateDTO.getUserId()));
+
+        ProcessInstance processInstance = processInstanceRepository.findById(notificationCreateDTO.getProcessInstanceId())
                 .orElseThrow(()-> new ProcessInstanceNotFoundException
-                        ("Process instance is not found with this id : " + processInstanceId));
+                        ("Process instance is not found with this id : " + notificationCreateDTO.getProcessInstanceId()));
 
-        Task task =  taskRepository.findById(taskId)
-                .orElseThrow(()-> new TaskNotFoundException
-                        ("Task is not found with this id : " + taskId));
+        Task task = null;
 
+        if(notificationCreateDTO.getTaskId() != null) {
+            task = taskRepository.findById(notificationCreateDTO.getTaskId())
+                    .orElseThrow(() -> new TaskNotFoundException
+                            ("Task is not found with this id : " + notificationCreateDTO.getTaskId()));
+        }
         notification.setTask(task);
         notification.setProcessInstance(processInstance);
         notification.setUser(user);
         notification.setIsRead(false);
 
-        return notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+        return notificationMapper.toNotificationResponseDTO(savedNotification);
     }
 
 
