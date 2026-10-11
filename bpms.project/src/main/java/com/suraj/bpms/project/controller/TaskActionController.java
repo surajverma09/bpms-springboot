@@ -1,8 +1,13 @@
 package com.suraj.bpms.project.controller;
 
-import com.suraj.bpms.project.entity.TaskAction;
+import com.suraj.bpms.project.dto.taskaction.TaskActionCreateDTO;
+import com.suraj.bpms.project.dto.taskaction.TaskActionResponseDTO;
+import com.suraj.bpms.project.response.ApiResponse;
 import com.suraj.bpms.project.service.TaskActionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,19 +20,19 @@ public class TaskActionController {
     private final TaskActionService taskActionService;
 
     @GetMapping
-    public List<TaskAction> getAllTaskAction(){
+    public List<TaskActionResponseDTO> getAllTaskAction(){
         return taskActionService.getAllTaskAction();
     }
 
     @GetMapping("/{id}")
-    public TaskAction getTaskActionById(@PathVariable Long id){
+    public TaskActionResponseDTO getTaskActionById(@PathVariable Long id){
         return taskActionService.getTaskActionById(id);
     }
 
-    @PostMapping("/{taskId}/{userId}")
-    public TaskAction createTaskAction(@PathVariable Long taskId,
-                                       @PathVariable Long userId,
-                                       @RequestBody TaskAction taskAction){
-        return taskActionService.createTaskAction(taskId, userId, taskAction);
+    @PostMapping("/{userId}")
+    public ResponseEntity<ApiResponse> createTaskAction(@PathVariable Long userId,
+                                                        @Valid @RequestBody TaskActionCreateDTO taskActionCreateDTO){
+        taskActionService.createTaskAction(userId, taskActionCreateDTO);
+        return new ResponseEntity<>(new ApiResponse("Task action is created successfully"), HttpStatus.CREATED);
     }
 }

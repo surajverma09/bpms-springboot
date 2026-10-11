@@ -1,11 +1,14 @@
 package com.suraj.bpms.project.service;
 
+import com.suraj.bpms.project.dto.taskaction.TaskActionCreateDTO;
+import com.suraj.bpms.project.dto.taskaction.TaskActionResponseDTO;
 import com.suraj.bpms.project.entity.Task;
 import com.suraj.bpms.project.entity.TaskAction;
 import com.suraj.bpms.project.entity.User;
 import com.suraj.bpms.project.exception.TaskActionNotFoundException;
 import com.suraj.bpms.project.exception.TaskNotFoundException;
 import com.suraj.bpms.project.exception.UserNotFoundException;
+import com.suraj.bpms.project.mapper.TaskActionMapper;
 import com.suraj.bpms.project.repository.TaskActionRepository;
 import com.suraj.bpms.project.repository.TaskRepository;
 import com.suraj.bpms.project.repository.UserRepository;
@@ -21,24 +24,32 @@ public class TaskActionService {
     private final TaskActionRepository taskActionRepository;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final TaskActionMapper taskActionMapper;
 
 
-    public List<TaskAction> getAllTaskAction(){
-        return taskActionRepository.findAll();
+    public List<TaskActionResponseDTO> getAllTaskAction(){
+        return taskActionRepository.findAll()
+                .stream()
+                .map(taskActionMapper::toTaskActionResponseDTO)
+                .toList();
+
     }
-
-
-    public TaskAction getTaskActionById(Long id){
-        return taskActionRepository.findById(id)
+    public TaskActionResponseDTO getTaskActionById(Long id){
+        TaskAction taskAction = taskActionRepository.findById(id)
                 .orElseThrow(()-> new TaskActionNotFoundException
                         ("Task Action is not found with this id : " + id));
+
+        return taskActionMapper.toTaskActionResponseDTO(taskAction);
     }
 
-    public TaskAction createTaskAction(Long taskId, Long userId, TaskAction taskAction){
+    public TaskActionResponseDTO createTaskAction(Long userId,
+                                                  TaskActionCreateDTO taskActionCreateDTO){
 
-        Task task = taskRepository.findById(taskId)
+        TaskAction taskAction = taskActionMapper.toTaskActionEntityDTO(taskActionCreateDTO);
+
+        Task task = taskRepository.findById(taskActionCreateDTO.getTaskId())
                 .orElseThrow(()-> new TaskNotFoundException
-                        ("Task is not found with this id : " + taskId));
+                        ("Task is not found with this id : " + taskActionCreateDTO.getTaskId()));
 
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(()-> new UserNotFoundException
@@ -47,7 +58,8 @@ public class TaskActionService {
         taskAction.setTask(task);
         taskAction.setActionBy(user);
 
-        return taskActionRepository.save(taskAction);
+        TaskAction savedTaskAction = taskActionRepository.save(taskAction);
+        return taskActionMapper.toTaskActionResponseDTO(savedTaskAction);
     }
 
 }
