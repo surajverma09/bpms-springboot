@@ -1,4 +1,17 @@
-package com.suraj.bpms.project.dto.processinstance;
+    package com.suraj.bpms.project.dto.processinstance;
 
-public class ProcessInstanceCreateDTO {
-}
+    import lombok.AllArgsConstructor;
+    import lombok.Getter;
+    import lombok.NoArgsConstructor;
+    import lombok.Setter;
+    import java.util.Map;
+
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class ProcessInstanceCreateDTO {
+
+        private Map<String, Object> requestData;
+
+    }
