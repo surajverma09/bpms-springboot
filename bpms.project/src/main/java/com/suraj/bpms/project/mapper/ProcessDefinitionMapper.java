@@ -30,7 +30,6 @@ public class ProcessDefinitionMapper {
 
         processDefinition.setName(processDefinitionCreateDTO.getName());
         processDefinition.setDescription(processDefinitionCreateDTO.getDescription());
-        processDefinition.setVersion(processDefinitionCreateDTO.getVersion());
 
         return processDefinition;
     }

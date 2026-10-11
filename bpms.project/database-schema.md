@@ -1,6 +1,7 @@
 ### Database Schema
 
-MySQL database `bpms`. Tables are generated from the JPA entities (`spring.jpa.hibernate.ddl-auto=update`), so the entity classes in `entity/` are the source of truth.
+MySQL database `bpms`. Tables are generated from the JPA entities
+(`spring.jpa.hibernate.ddl-auto=update`), so the entity classes in `entity/` are the source of truth.
 
 ### Overview
 
@@ -126,10 +127,3 @@ Planned roles: ADMIN, MANAGER, HR, EMPLOYEE, FINANCE.
 | process_step | task | task.process_step_id |
 | task | task_actions | task_actions.task_id |
 | task | notifications | notifications.task_id |
-
-## Known issues / to do
-
-- Table names are inconsistent: `process_step`, `task` and `audit_log` are singular, the rest are plural. Rename them to plural.
-- `status` and `action` columns are plain strings. Replace them with enums.
-- `roles` has no seed data yet, so the roles have to be inserted by hand.
-- `process_definitions.created_by` should probably be `NOT NULL`.
