@@ -1,28 +1,36 @@
 package com.suraj.bpms.project.service;
 
+import com.suraj.bpms.project.dto.task.TaskResponseDTO;
 import com.suraj.bpms.project.entity.*;
 import com.suraj.bpms.project.exception.TaskNotFoundException;
+import com.suraj.bpms.project.mapper.TaskMapper;
 import com.suraj.bpms.project.repository.*;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.*;
 
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final ProcessInstanceRepository processInstanceRepository;
-    private final ProcessStepRepository processStepRepository;
-    private final UserRepository userRepository;
+    private final TaskMapper taskMapper;
 
 
-    public List<Task> getAllTask(){
-        return taskRepository.findAll();
+    public List<TaskResponseDTO> getAllTask(){
+        return taskRepository.findAll()
+                .stream()
+                .map(taskMapper::toTaskResponseDTO)
+                .toList();
     }
-    public Task getTaskById(Long id){
-        return taskRepository.findById(id)
+
+
+    public TaskResponseDTO getTaskById(Long id){
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + id));
+
+        return taskMapper.toTaskResponseDTO(task);
     }
 }

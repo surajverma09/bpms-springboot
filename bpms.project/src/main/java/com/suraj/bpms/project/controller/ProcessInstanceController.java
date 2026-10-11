@@ -5,6 +5,7 @@ import com.suraj.bpms.project.dto.processinstance.ProcessInstanceResponseDTO;
 import com.suraj.bpms.project.entity.ProcessInstance;
 import com.suraj.bpms.project.response.ApiResponse;
 import com.suraj.bpms.project.service.ProcessInstanceService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class ProcessInstanceController {
     @PostMapping("/{processDefinitionId}/{userId}")
     public ResponseEntity<ApiResponse> createProcessInstance(@PathVariable Long processDefinitionId,
                                                              @PathVariable Long userId,
-                                                             @RequestBody ProcessInstanceCreateDTO processInstanceCreateDTO){
+                                                             @Valid @RequestBody ProcessInstanceCreateDTO processInstanceCreateDTO){
         processInstanceService.createProcessInstance(processDefinitionId, userId, processInstanceCreateDTO);
 
         return new ResponseEntity<>(new ApiResponse("Process instance is created successfully"), HttpStatus.CREATED);
