@@ -53,8 +53,7 @@ public class ProcessStepService {
         processStep.setProcessDefinition(processDefinition);
         processStep.setAssignedRole(role);
 
-
-
+        
         ProcessStep savedProcessStep =  processStepRepository.save(processStep);
         return processStepMapper.toProcessStepResponseDto(savedProcessStep);
     }

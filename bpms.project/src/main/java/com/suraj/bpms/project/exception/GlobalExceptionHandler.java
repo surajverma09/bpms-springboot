@@ -20,47 +20,62 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ProcessDefinitionNotFoundException.class)
-    public ResponseEntity<String> handleProcessDefinitionNotFound(ProcessDefinitionNotFoundException ex){
+    public ResponseEntity<String> handleProcessDefinitionNotFound(ProcessDefinitionNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ProcessStepNotFoundException.class)
-    public ResponseEntity<String> handleProcessStepNotFound(ProcessStepNotFoundException ex){
+    public ResponseEntity<String> handleProcessStepNotFound(ProcessStepNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(RoleNotFoundException.class)
-    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex){
+    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(ProcessInstanceNotFoundException.class)
-    public ResponseEntity<String> handleProcessInstanceNotFoundException(ProcessInstanceNotFoundException ex){
-        return new ResponseEntity<>(ex.getMessage() , HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleProcessInstanceNotFoundException(ProcessInstanceNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(TaskNotFoundException.class)
-    public ResponseEntity<String> handleTaskNotFoundException(TaskNotFoundException ex){
+    public ResponseEntity<String> handleTaskNotFoundException(TaskNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(TaskActionNotFoundException.class)
-    public ResponseEntity<String> handleTaskActionNotFoundException(TaskActionNotFoundException ex){
+    public ResponseEntity<String> handleTaskActionNotFoundException(TaskActionNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(NotificationNotFoundException.class)
-    public ResponseEntity<String> handleNotificationNotFoundException(NotificationNotFoundException ex){
+    public ResponseEntity<String> handleNotificationNotFoundException(NotificationNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AuditLogNotFoundException.class)
-    public ResponseEntity<String> handleAuditLogNotFoundException(AuditLogNotFoundException ex){
-        return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleAuditLogNotFoundException(AuditLogNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
 
-        for(FieldError error : ex.getBindingResult().getFieldErrors()){
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ProcessDefinitionHasNoStepException.class)
+    public ResponseEntity<String> handleProcessDefinitionHasNoStepException(ProcessDefinitionHasNoStepException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoEligibleUserIsFoundException.class)
+    public ResponseEntity<String> handleNoEligibleUserIsFoundException(NoEligibleUserIsFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
