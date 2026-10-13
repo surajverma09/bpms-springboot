@@ -78,4 +78,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNoEligibleUserIsFoundException(NoEligibleUserIsFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(InvalidTaskStatusException.class)
+    public ResponseEntity<String> handleInvalidTaskStatusException(InvalidTaskStatusException ex){
+        return new ResponseEntity<>(ex.getMessage(),HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(UnauthorizedUserFoundException.class)
+    public ResponseEntity<String> handleUnauthorizedUserFoundException(UnauthorizedUserFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+    @ExceptionHandler(InvalidTaskActionException.class)
+    public ResponseEntity<String> handleInvalidTaskActionException(InvalidTaskActionException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

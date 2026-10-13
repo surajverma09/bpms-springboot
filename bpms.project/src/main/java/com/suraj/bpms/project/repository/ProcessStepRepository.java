@@ -9,4 +9,8 @@ public interface ProcessStepRepository extends JpaRepository<ProcessStep, Long> 
 
     Optional<ProcessStep> findFirstByProcessDefinitionIdOrderByStepOrderAsc(Long processDefinitionId);
 
+    Optional<ProcessStep> findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc(
+            Long processDefinitionId,
+            Integer currentStepOrder
+    );
 }

@@ -1,12 +1,10 @@
 package com.suraj.bpms.project.controller;
 
 import com.suraj.bpms.project.dto.task.TaskResponseDTO;
+import com.suraj.bpms.project.enums.TaskActionType;
 import com.suraj.bpms.project.service.TaskService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,5 +24,14 @@ public class TaskController {
     @GetMapping("/{id}")
     public TaskResponseDTO getTaskById(@PathVariable Long id){
         return taskService.getTaskById(id);
+    }
+
+    @PatchMapping("/{taskId}/action")
+    public TaskResponseDTO approveOrReject(
+            @PathVariable Long taskId,
+            @RequestParam Long userId,
+            @RequestParam TaskActionType typeAction) {
+
+        return taskService.approveOrReject(taskId, userId, typeAction);
     }
 }
