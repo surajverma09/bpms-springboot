@@ -46,12 +46,6 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + taskId));
 
-        System.out.println(
-                "Task ID: " + task.getId()
-                        + ", Status before action: " + task.getStatus()
-                        + ", Action: " + typeAction
-        );
-
         if(!task.getStatus().equals("PENDING")){
             throw new InvalidTaskStatusException("Task has already been processed. Current status: " + task.getStatus());
 
@@ -83,7 +77,6 @@ public class TaskService {
 
         if (nextProcessStep.isEmpty()) {
             task.setStatus("APPROVED");
-            System.out.println("Task status after approval: " + task.getStatus());
 
             task.setCompletedAt(Timestamp.from(
                     java.time.Instant.now()));
@@ -128,7 +121,7 @@ public class TaskService {
         newTask.setProcessStep(processStep);
         newTask.setAssignedToUser(selectedUser);
         newTask.setStatus("PENDING");
-        task.setStatus("APPROVE");
+        task.setStatus("APPROVED");
         task.setCompletedAt(Timestamp.from(
                 java.time.Instant.now()));
 
