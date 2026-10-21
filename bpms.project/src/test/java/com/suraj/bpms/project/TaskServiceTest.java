@@ -46,7 +46,7 @@ public class TaskServiceTest {
 
         task.setStatus("APPROVED");
 
-        when(taskRepository.findById(21L)).
+        when(taskRepository.findByIdForUpdate(21L)).
                 thenReturn(Optional.of(task));
 
 
@@ -67,7 +67,7 @@ public class TaskServiceTest {
         user.setId(10L);
         task.setAssignedToUser(user);
 
-        when(taskRepository.findById(21L)).thenReturn(Optional.of(task));
+        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         assertThrows(UnauthorizedUserFoundException.class,
                 ()->taskService.approveOrReject
@@ -77,7 +77,7 @@ public class TaskServiceTest {
     @Test //test -> 3
     void shouldThrowExceptionWhenTaskIsNotFound(){
 
-        when(taskRepository.findById(99L)).thenReturn(Optional.empty());
+        when(taskRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
         assertThrows(TaskNotFoundException.class,()-> taskService.approveOrReject
                 (99L, 10L, TaskActionType.APPROVE));
@@ -92,7 +92,7 @@ public class TaskServiceTest {
         user.setId(10L);
         task.setAssignedToUser(user);
 
-        when(taskRepository.findById(21L)).thenReturn(Optional.of(task));
+        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         assertThrows(InvalidTaskActionException.class,()->
                 taskService.approveOrReject(21L, 10L, null));
@@ -112,7 +112,7 @@ public class TaskServiceTest {
         task.setProcessInstance(processInstance);
         task.setAssignedToUser(user);
 
-        when(taskRepository.findById(21L)).thenReturn(Optional.of(task));
+        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
 
         taskService.approveOrReject(21L, 10L, TaskActionType.REJECT);
@@ -140,7 +140,7 @@ public class TaskServiceTest {
         user.setId(10L);
         task.setAssignedToUser(user);
 
-        when(taskRepository.findById(21L)).thenReturn(Optional.of(task));
+        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
         when(processStepRepository
                 .findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc
                         (processDefinition.getId(),processStep.getStepOrder()))
@@ -186,7 +186,7 @@ public class TaskServiceTest {
         currentUser.setRole(managerRole);
         nextUser.setRole(financeRole);
 
-        when(taskRepository.findById(21L)).thenReturn(Optional.of(task));
+        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         when(processStepRepository.
                 findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc
@@ -241,7 +241,7 @@ public class TaskServiceTest {
 
         task.setAssignedToUser(currentUser);
 
-        when(taskRepository.findById(21L)).thenReturn(Optional.of(task));
+        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
         when(processStepRepository.
                 findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc
                         (processDefinition.getId(), currentStep.getStepOrder()))

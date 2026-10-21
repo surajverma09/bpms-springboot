@@ -43,7 +43,7 @@ public class TaskService {
     @Transactional
     public TaskResponseDTO approveOrReject(Long taskId, Long userId,
                                 TaskActionType typeAction){
-        Task task = taskRepository.findById(taskId)
+        Task task = taskRepository.findByIdForUpdate(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + taskId));
 
         if(!task.getStatus().equals("PENDING")){
