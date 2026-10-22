@@ -239,8 +239,6 @@ public class TaskTransactionIntegrationTest {
 
         executor.shutdown();
 
-        System.out.println("Concurrent results: " + results);
-
         assertEquals(1, results.stream()
                 .filter("SUCCESS"::equals)
                 .count());

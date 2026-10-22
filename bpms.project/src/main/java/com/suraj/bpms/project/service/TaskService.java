@@ -10,6 +10,8 @@ import com.suraj.bpms.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
+import com.suraj.bpms.project.entity.TaskAction;
+import com.suraj.bpms.project.repository.TaskActionRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +24,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final UserRepository userRepository;
     private final ProcessStepRepository processStepRepository;
-    private final ProcessInstanceRepository processInstanceRepository;
+    private final TaskActionRepository taskActionRepository;
 
 
     public List<TaskResponseDTO> getAllTask(){
@@ -38,6 +40,18 @@ public class TaskService {
                 .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + id));
 
         return taskMapper.toTaskResponseDTO(task);
+    }
+
+    private void recordTaskAction(Task task, Long userId, TaskActionType actionType){
+        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(()-> new UserNotFoundException("User is not found with this id : " + userId));
+
+        TaskAction taskAction = new TaskAction();
+        taskAction.setActionBy(user);
+        taskAction.setAction(actionType.name());
+        taskAction.setTask(task);
+
+        taskActionRepository.save(taskAction);
     }
 
     @Transactional
@@ -65,6 +79,7 @@ public class TaskService {
 
             taskRepository.save(task);
 
+            recordTaskAction(task, userId, typeAction);
             return taskMapper.toTaskResponseDTO(task);
         }
 
@@ -83,6 +98,8 @@ public class TaskService {
             task.getProcessInstance().setStatus("COMPLETED");
 
             taskRepository.save(task);
+
+            recordTaskAction(task, userId, typeAction);
 
             return taskMapper.toTaskResponseDTO(task);
         }
@@ -125,6 +142,7 @@ public class TaskService {
         task.setCompletedAt(Timestamp.from(
                 java.time.Instant.now()));
 
+        recordTaskAction(task, userId, typeAction);
 
         taskRepository.save(task);
         taskRepository.save(newTask);

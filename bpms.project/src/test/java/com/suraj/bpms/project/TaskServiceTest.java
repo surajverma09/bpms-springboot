@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.suraj.bpms.project.repository.TaskActionRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,8 @@ public class TaskServiceTest {
     UserRepository userRepository;
     @Mock
     ProcessStepRepository processStepRepository;
+    @Mock
+    TaskActionRepository taskActionRepository;
 
 
 
@@ -108,6 +111,9 @@ public class TaskServiceTest {
         processInstance.setStatus("RUNNING");
         task.setStatus("PENDING");
 
+        when(userRepository.findByIdAndIsDeletedFalse(10L))
+                .thenReturn(Optional.of(user));
+
         user.setId(10L);
         task.setProcessInstance(processInstance);
         task.setAssignedToUser(user);
@@ -116,6 +122,16 @@ public class TaskServiceTest {
 
 
         taskService.approveOrReject(21L, 10L, TaskActionType.REJECT);
+
+        ArgumentCaptor<TaskAction> captor = ArgumentCaptor.forClass(TaskAction.class);
+
+        verify(taskActionRepository).save(captor.capture());
+
+        TaskAction savedAction = captor.getValue();
+
+        assertEquals("REJECT", savedAction.getAction());
+        assertEquals(task, savedAction.getTask());
+        assertEquals(user, savedAction.getActionBy());
 
         assertEquals("REJECTED", task.getStatus());
         assertEquals("REJECTED", processInstance.getStatus());
@@ -130,6 +146,9 @@ public class TaskServiceTest {
         ProcessDefinition processDefinition = new ProcessDefinition();
         ProcessStep processStep = new ProcessStep();
         Task task = new Task();
+
+        when(userRepository.findByIdAndIsDeletedFalse(10L))
+                .thenReturn(Optional.of(user));
 
         processStep.setProcessDefinition(processDefinition);
         processStep.setStepOrder(3);
@@ -147,6 +166,16 @@ public class TaskServiceTest {
                 .thenReturn(Optional.empty());
 
         taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE);
+
+        ArgumentCaptor<TaskAction> captor = ArgumentCaptor.forClass(TaskAction.class);
+
+        verify(taskActionRepository).save(captor.capture());
+
+        TaskAction savedAction = captor.getValue();
+
+        assertEquals("APPROVE", savedAction.getAction());
+        assertEquals(task, savedAction.getTask());
+        assertEquals(user , savedAction.getActionBy());
 
         assertEquals("APPROVED", task.getStatus());
         assertEquals("COMPLETED", processInstance.getStatus());
@@ -168,6 +197,10 @@ public class TaskServiceTest {
         Task task = new Task();
         Role managerRole = new Role();
         Role financeRole = new Role();
+
+
+        when(userRepository.findByIdAndIsDeletedFalse(10L))
+                .thenReturn(Optional.of(currentUser));
 
         currentUser.setId(10L);
         nextUser.setId(3L);
