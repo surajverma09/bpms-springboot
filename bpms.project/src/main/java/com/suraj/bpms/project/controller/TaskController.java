@@ -1,8 +1,10 @@
 package com.suraj.bpms.project.controller;
 
 import com.suraj.bpms.project.dto.task.TaskResponseDTO;
+import com.suraj.bpms.project.dto.taskaction.TaskActionReqDTO;
 import com.suraj.bpms.project.enums.TaskActionType;
 import com.suraj.bpms.project.service.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +30,11 @@ public class TaskController {
 
     @PatchMapping("/{taskId}/action")
     public TaskResponseDTO approveOrReject(
+            @Valid @RequestBody TaskActionReqDTO taskActionReqDTO,
             @PathVariable Long taskId,
             @RequestParam Long userId,
             @RequestParam TaskActionType typeAction) {
 
-        return taskService.approveOrReject(taskId, userId, typeAction);
+        return taskService.approveOrReject(taskId, userId, typeAction, taskActionReqDTO.getComment());
     }
 }

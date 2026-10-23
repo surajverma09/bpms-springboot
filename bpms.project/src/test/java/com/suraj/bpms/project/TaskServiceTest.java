@@ -1,12 +1,12 @@
 package com.suraj.bpms.project;
 
+import com.suraj.bpms.project.dto.auditlog.AuditLogCreateDTO;
 import com.suraj.bpms.project.entity.*;
 import com.suraj.bpms.project.enums.TaskActionType;
 import com.suraj.bpms.project.exception.*;
 import com.suraj.bpms.project.mapper.TaskMapper;
-import com.suraj.bpms.project.repository.ProcessStepRepository;
-import com.suraj.bpms.project.repository.TaskRepository;
-import com.suraj.bpms.project.repository.UserRepository;
+import com.suraj.bpms.project.repository.*;
+import com.suraj.bpms.project.service.AuditLogService;
 import com.suraj.bpms.project.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.suraj.bpms.project.repository.TaskActionRepository;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,31 +35,53 @@ public class TaskServiceTest {
     ProcessStepRepository processStepRepository;
     @Mock
     TaskActionRepository taskActionRepository;
-
+    @Mock
+    RoleRepository roleRepository;
+    @Mock
+    private AuditLogService auditLogService;
 
 
     @InjectMocks
     TaskService taskService;
 
 
-    @Test //test -> 1
-    void shouldThrowAnExceptionWhenTaskIsAlreadyApproved(){
+        @Test //test -> 1
+        void shouldThrowAnExceptionWhenTaskIsAlreadyApproved(){
 
-        Task task = new Task();
+            Task task = new Task();
+            task.setId(21L);
+            task.setStatus("APPROVED");
 
-        task.setStatus("APPROVED");
+            ProcessInstance processInstance = new ProcessInstance();
 
-        when(taskRepository.findByIdForUpdate(21L)).
-                thenReturn(Optional.of(task));
+            ProcessDefinition processDefinition = new ProcessDefinition();
+            processDefinition.setName("Leave Application");
+
+            processInstance.setProcessDefinition(processDefinition);
+
+            task.setProcessInstance(processInstance);
+
+            User user = new User();
+            Role role = new Role();
+
+            role.setName("MANAGER");
+            user.setId(10L);
+            user.setRole(role);
 
 
-        assertThrows(
-                InvalidTaskStatusException.class,
-                ()->taskService.approveOrReject(
-                        21L,10l, TaskActionType.APPROVE
-                )
-        );
-    }
+            when(taskRepository.findByIdForUpdate(21L)).
+                    thenReturn(Optional.of(task));
+
+            when(userRepository.findByIdAndIsDeletedFalse(10L))
+                    .thenReturn(Optional.of(user));
+
+            assertThrows(
+                    InvalidTaskStatusException.class,
+                    ()->taskService.approveOrReject(
+                            21L,10l, TaskActionType.APPROVE,null
+                    )
+            );
+        }
     @Test //test -> 2
     void shouldThrowExceptionWhenUserIsNotAuthorisedOrAssignedToTask(){
 
@@ -70,11 +92,28 @@ public class TaskServiceTest {
         user.setId(10L);
         task.setAssignedToUser(user);
 
+        ProcessDefinition processDefinition = new ProcessDefinition();
+        processDefinition.setName("Leave Application");
+
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setProcessDefinition(processDefinition);
+
+        task.setProcessInstance(processInstance);
+        Role role = new Role();
+        role.setName("EMPLOYEE");
+
+        User requestingUser = new User();
+        requestingUser.setId(20L);
+        requestingUser.setRole(role);
+
+        when(userRepository.findByIdAndIsDeletedFalse(20L))
+                .thenReturn(Optional.of(requestingUser));
+
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         assertThrows(UnauthorizedUserFoundException.class,
                 ()->taskService.approveOrReject
-                        (21L, 20L, TaskActionType.APPROVE));
+                        (21L, 20L, TaskActionType.APPROVE, null));
     }
 
     @Test //test -> 3
@@ -83,22 +122,36 @@ public class TaskServiceTest {
         when(taskRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
         assertThrows(TaskNotFoundException.class,()-> taskService.approveOrReject
-                (99L, 10L, TaskActionType.APPROVE));
+                (99L, 10L, TaskActionType.APPROVE, null));
     }
 
     @Test //test -> 4
     void shouldThrowExceptionWhenTaskActionIsNotFound(){
 
-        Task task = new Task();
         User user = new User();
+        Role role = new Role();
+        role.setName("MANAGER");
+        user.setRole(role);
+
+        when(userRepository.findByIdAndIsDeletedFalse(10L))
+                .thenReturn(Optional.of(user));
+
+
+        Task task = new Task();
         task.setStatus("PENDING");
         user.setId(10L);
         task.setAssignedToUser(user);
+        ProcessDefinition processDefinition = new ProcessDefinition();
+        processDefinition.setName("Leave Application");
 
+        ProcessInstance processInstance = new ProcessInstance();
+        processInstance.setProcessDefinition(processDefinition);
+
+        task.setProcessInstance(processInstance);
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         assertThrows(InvalidTaskActionException.class,()->
-                taskService.approveOrReject(21L, 10L, null));
+                taskService.approveOrReject(21L, 10L, null, null));
     }
 
     @Test //test -> 5
@@ -107,21 +160,29 @@ public class TaskServiceTest {
         ProcessInstance processInstance = new ProcessInstance();
         Task task = new Task();
         User user = new User();
+        Role role = new Role();
 
-        processInstance.setStatus("RUNNING");
+        ProcessDefinition processDefinition = new ProcessDefinition();
+        processDefinition.setName("Leave Application");
+
+        processInstance.setId(100L);
+        processInstance.setProcessDefinition(processDefinition);
+
+        user.setId(10L);
+        user.setRole(role);
+        role.setName("MANAGER");
+
+        task.setId(21L);
+        task.setProcessInstance(processInstance);
+        task.setAssignedToUser(user);
         task.setStatus("PENDING");
 
         when(userRepository.findByIdAndIsDeletedFalse(10L))
                 .thenReturn(Optional.of(user));
-
-        user.setId(10L);
-        task.setProcessInstance(processInstance);
-        task.setAssignedToUser(user);
-
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
 
-        taskService.approveOrReject(21L, 10L, TaskActionType.REJECT);
+        taskService.approveOrReject(21L, 10L, TaskActionType.REJECT, null);
 
         ArgumentCaptor<TaskAction> captor = ArgumentCaptor.forClass(TaskAction.class);
 
@@ -137,13 +198,33 @@ public class TaskServiceTest {
         assertEquals("REJECTED", processInstance.getStatus());
         assertNotNull(task.getCompletedAt());
 
+
+        ArgumentCaptor<AuditLogCreateDTO> auditLog = ArgumentCaptor.forClass(AuditLogCreateDTO.class);
+
+        verify(auditLogService, times(2)).createAuditLog(auditLog.capture());
+
+        List<AuditLogCreateDTO> audits = auditLog.getAllValues();
+
+        assertEquals("TASK_REJECTED", audits.get(0).getAction());
+        assertEquals("TASK", audits.get(0).getEntityType());
+        assertEquals(task.getId(), audits.get(0).getEntityId());
+
+        assertEquals("PROCESS_INSTANCE_REJECTED", audits.get(1).getAction());
+        assertEquals("PROCESS_INSTANCE", audits.get(1).getEntityType());
+        assertEquals(task.getProcessInstance().getId(), audits.get(1).getEntityId());
+
     }
 
     @Test
     void shouldCompleteProcessInstanceWhenDirectorApprovesIt(){
         User user = new User();
+        Role role = new Role();
+        role.setName("DIRECTOR");
+        user.setRole(role);
         ProcessInstance processInstance = new ProcessInstance();
         ProcessDefinition processDefinition = new ProcessDefinition();
+        processDefinition.setName("Leave Application");
+        processInstance.setProcessDefinition(processDefinition);
         ProcessStep processStep = new ProcessStep();
         Task task = new Task();
 
@@ -158,6 +239,8 @@ public class TaskServiceTest {
         task.setProcessStep(processStep);
         user.setId(10L);
         task.setAssignedToUser(user);
+        task.setId(21L);
+        processInstance.setId(100L);
 
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
         when(processStepRepository
@@ -165,7 +248,7 @@ public class TaskServiceTest {
                         (processDefinition.getId(),processStep.getStepOrder()))
                 .thenReturn(Optional.empty());
 
-        taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE);
+        taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE, null);
 
         ArgumentCaptor<TaskAction> captor = ArgumentCaptor.forClass(TaskAction.class);
 
@@ -183,6 +266,19 @@ public class TaskServiceTest {
 
         verify(taskRepository, times(1)).save(task);
 
+        ArgumentCaptor<AuditLogCreateDTO> captorLog = ArgumentCaptor.forClass(AuditLogCreateDTO.class);
+
+        verify(auditLogService, times(2)).createAuditLog(captorLog.capture());
+
+        List<AuditLogCreateDTO> audits = captorLog.getAllValues();
+
+        assertEquals("TASK_APPROVED", audits.get(0).getAction());
+        assertEquals("TASK", audits.get(0).getEntityType());
+        assertEquals(task.getId(), audits.get(0).getEntityId());
+
+        assertEquals("PROCESS_INSTANCE_COMPLETED", audits.get(1).getAction());
+        assertEquals("PROCESS_INSTANCE", audits.get(1).getEntityType());
+        assertEquals(task.getProcessInstance().getId(), audits.get(1).getEntityId());
     }
 
     @Test
@@ -197,7 +293,6 @@ public class TaskServiceTest {
         Task task = new Task();
         Role managerRole = new Role();
         Role financeRole = new Role();
-
 
         when(userRepository.findByIdAndIsDeletedFalse(10L))
                 .thenReturn(Optional.of(currentUser));
@@ -218,6 +313,8 @@ public class TaskServiceTest {
         nextStep.setAssignedRole(financeRole);
         currentUser.setRole(managerRole);
         nextUser.setRole(financeRole);
+        processDefinition.setName("Leave Application");
+        processInstance.setProcessDefinition(processDefinition);
 
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
@@ -231,7 +328,7 @@ public class TaskServiceTest {
         when(taskRepository.countByAssignedToUserIdAndStatus(nextUser.getId(),"PENDING"))
                 .thenReturn(2L);
 
-        taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE);
+        taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE, null);
 
         assertEquals("APPROVED", task.getStatus());
         assertEquals("RUNNING", processInstance.getStatus());
@@ -240,6 +337,16 @@ public class TaskServiceTest {
         Task newTask = taskCaptor.getAllValues().get(1);
         assertEquals("PENDING", newTask.getStatus());
         assertEquals(nextUser.getId(), newTask.getAssignedToUser().getId());
+
+        ArgumentCaptor<AuditLogCreateDTO> auditCaptor = ArgumentCaptor.forClass(AuditLogCreateDTO.class);
+
+        verify(auditLogService).createAuditLog(auditCaptor.capture());
+
+        AuditLogCreateDTO captureAudit = auditCaptor.getValue();
+
+        assertEquals(task.getId(),captureAudit.getEntityId());
+        assertEquals("TASK", captureAudit.getEntityType());
+        assertEquals("TASK_APPROVED", captureAudit.getAction());
     }
 
     @Test
@@ -274,6 +381,9 @@ public class TaskServiceTest {
 
         task.setAssignedToUser(currentUser);
 
+        when(userRepository.findByIdAndIsDeletedFalse(10L))
+                .thenReturn(Optional.of(currentUser));
+
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
         when(processStepRepository.
                 findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc
@@ -283,7 +393,7 @@ public class TaskServiceTest {
                 .thenReturn(List.of());
 
         assertThrows(NoEligibleUserIsFoundException.class, ()-> taskService
-                .approveOrReject(21L, 10L, TaskActionType.APPROVE));
+                .approveOrReject(21L, 10L, TaskActionType.APPROVE, null));
         assertEquals("PENDING", task.getStatus());
         assertEquals("RUNNING", processInstance.getStatus());
     }

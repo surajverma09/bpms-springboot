@@ -108,7 +108,7 @@ public class TaskTransactionIntegrationTest {
                 () -> taskService.approveOrReject(
                         taskId,
                         managerId,
-                        TaskActionType.APPROVE
+                        TaskActionType.APPROVE, null
                 )
         );
 
@@ -214,7 +214,8 @@ public class TaskTransactionIntegrationTest {
                 taskService.approveOrReject(
                         taskId,
                         managerId,
-                        TaskActionType.APPROVE
+                        TaskActionType.APPROVE,
+                        null
                 );
                 return "SUCCESS";
             }

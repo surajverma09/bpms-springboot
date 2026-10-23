@@ -17,6 +17,6 @@ public class AuditLogResponseDTO {
     private String action;
     private String entityType;
     private Long entityId;
-    private String details;
+    private String details  ;
     private Timestamp createdAt;
 }

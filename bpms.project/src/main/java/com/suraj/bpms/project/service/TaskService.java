@@ -12,6 +12,8 @@ import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 import com.suraj.bpms.project.entity.TaskAction;
 import com.suraj.bpms.project.repository.TaskActionRepository;
+import com.suraj.bpms.project.service.AuditLogService;
+import com.suraj.bpms.project.dto.auditlog.AuditLogCreateDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,11 @@ public class TaskService {
     private final UserRepository userRepository;
     private final ProcessStepRepository processStepRepository;
     private final TaskActionRepository taskActionRepository;
-
+    private final AuditLogService auditLogService;
+    private static final String TASK_REJECTED = "TASK_REJECTED";
+    private static final String TASK_APPROVED = "TASK_APPROVED";
+    private static final String PROCESS_REJECTED = "PROCESS_INSTANCE_REJECTED";
+    private static final String PROCESS_COMPLETED = "PROCESS_INSTANCE_COMPLETED"  ;
 
     public List<TaskResponseDTO> getAllTask(){
         return taskRepository.findAll()
@@ -42,7 +48,7 @@ public class TaskService {
         return taskMapper.toTaskResponseDTO(task);
     }
 
-    private void recordTaskAction(Task task, Long userId, TaskActionType actionType){
+    private void recordTaskAction(Task task, Long userId, TaskActionType actionType, String comment){
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(()-> new UserNotFoundException("User is not found with this id : " + userId));
 
@@ -50,15 +56,49 @@ public class TaskService {
         taskAction.setActionBy(user);
         taskAction.setAction(actionType.name());
         taskAction.setTask(task);
+        taskAction.setComment(comment);
 
         taskActionRepository.save(taskAction);
     }
 
+
+    private void recordAuditLog(
+            Long userId,
+            String action,
+            String entityType,
+            Long entityId,
+            String details){
+
+        AuditLogCreateDTO createDto = new AuditLogCreateDTO();
+        createDto.setUserId(userId);
+        createDto.setAction(action);
+        createDto.setEntityType(entityType);
+        createDto.setEntityId(entityId);
+        createDto.setDetails(details);
+
+        auditLogService.createAuditLog(createDto);
+
+    }
+
     @Transactional
     public TaskResponseDTO approveOrReject(Long taskId, Long userId,
-                                TaskActionType typeAction){
+                                TaskActionType typeAction, String comment){
+
         Task task = taskRepository.findByIdForUpdate(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + taskId));
+
+        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(()-> new UserNotFoundException("User is not found with this id : " + userId));
+
+        Role role = user.getRole();
+
+        String roleName = role.getName();
+
+        String processName = task.getProcessInstance().getProcessDefinition().getName();
+
+        String actionVerb = (typeAction == TaskActionType.APPROVE) ? "Approved" : "Rejected";
+
+        String taskDetails = roleName + " " +  actionVerb.toLowerCase() + " task " + " #" + task.getId() + " for " + processName;
 
         if(!task.getStatus().equals("PENDING")){
             throw new InvalidTaskStatusException("Task has already been processed. Current status: " + task.getStatus());
@@ -72,6 +112,11 @@ public class TaskService {
         }
 
         if (typeAction == TaskActionType.REJECT) {
+
+            String processDetails =
+                    processName + " process instance " + "#" +
+                            task.getProcessInstance().getId() + " was rejected";
+
             task.setStatus("REJECTED");
             task.setCompletedAt(Timestamp.from(
                     java.time.Instant.now()));
@@ -79,7 +124,11 @@ public class TaskService {
 
             taskRepository.save(task);
 
-            recordTaskAction(task, userId, typeAction);
+            recordTaskAction(task, userId, typeAction,comment);
+            recordAuditLog(userId, TASK_REJECTED,"TASK",
+                    task.getId(), taskDetails);
+            recordAuditLog(userId, PROCESS_REJECTED,"PROCESS_INSTANCE",
+                    task.getProcessInstance().getId(), processDetails);
             return taskMapper.toTaskResponseDTO(task);
         }
 
@@ -91,6 +140,11 @@ public class TaskService {
                         (processDefinitionId,currentStepOrder);
 
         if (nextProcessStep.isEmpty()) {
+
+            String processDetails =
+                    processName + " process instance " + "#" +
+                            task.getProcessInstance().getId() + " completed successfully";
+
             task.setStatus("APPROVED");
 
             task.setCompletedAt(Timestamp.from(
@@ -99,7 +153,12 @@ public class TaskService {
 
             taskRepository.save(task);
 
-            recordTaskAction(task, userId, typeAction);
+            recordTaskAction(task, userId, typeAction,comment);
+
+            recordAuditLog(userId, TASK_APPROVED,"TASK",
+                    task.getId(),taskDetails);
+            recordAuditLog(userId, PROCESS_COMPLETED, "PROCESS_INSTANCE",
+                    task.getProcessInstance().getId(),processDetails);
 
             return taskMapper.toTaskResponseDTO(task);
         }
@@ -130,8 +189,8 @@ public class TaskService {
                 currentSmallestCount = currentCount;
                 selectedUser = currentUser;
             }
-
         }
+
         Task newTask = new Task();
 
         newTask.setProcessInstance(task.getProcessInstance());
@@ -142,10 +201,13 @@ public class TaskService {
         task.setCompletedAt(Timestamp.from(
                 java.time.Instant.now()));
 
-        recordTaskAction(task, userId, typeAction);
+        recordTaskAction(task, userId, typeAction, comment  );
 
         taskRepository.save(task);
         taskRepository.save(newTask);
+
+        recordAuditLog(userId, TASK_APPROVED,"TASK",
+                task.getId(),taskDetails);
 
         return taskMapper.toTaskResponseDTO(task);
     }

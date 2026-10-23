@@ -29,6 +29,7 @@ public class AuditLogController {
     public AuditLogResponseDTO getAuditLogById(@PathVariable Long id){
         return auditLogService.getAuditLogById(id);
     }
+
     @GetMapping()
     public List<AuditLogResponseDTO> getAllAudit(){
         return auditLogService.getAllAuditLogs();
