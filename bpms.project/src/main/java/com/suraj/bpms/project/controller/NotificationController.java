@@ -20,13 +20,14 @@ public class NotificationController {
     private final NotificationService notificationService;
 
 
-    @GetMapping
-    public List<NotificationResponseDTO> getAllNotification(){
-        return notificationService.getAllNotification();
+    @GetMapping()
+    public List<NotificationResponseDTO> getAllNotification(@RequestParam Long userId){
+        return notificationService.getAllNotification(userId);
     }
+
     @GetMapping("/{id}")
-    public NotificationResponseDTO getNotificationById(@PathVariable Long id){
-        return notificationService.getNotificationById(id);
+    public NotificationResponseDTO getNotificationById(@PathVariable Long id, @RequestParam Long userId){
+        return notificationService.getNotificationById(id, userId);
     }
 
     @PostMapping
@@ -37,4 +38,22 @@ public class NotificationController {
         return new ResponseEntity<>(new ApiResponse("Notification is created Successfully"), HttpStatus.CREATED);
     }
 
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<ApiResponse> updateNotificationRead(@PathVariable Long id,
+                                                              @RequestParam Long userId){
+        notificationService.updateNotificationRead(id,userId);
+
+        return new ResponseEntity<>(new ApiResponse("Notification marked as read successfully"), HttpStatus.OK);
+    }
+
+    @GetMapping("/unread")
+    public List<NotificationResponseDTO> getUnreadNotifications(@RequestParam Long userId){
+
+        return notificationService.getUnreadNotifications(userId);
+    }
+
+    @GetMapping("/unread/count")
+    public Long getCountOfUnreadNotification(@RequestParam Long userId){
+        return notificationService.countUnreadNotification(userId);
+    }
 }

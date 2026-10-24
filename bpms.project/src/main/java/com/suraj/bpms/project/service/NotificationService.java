@@ -17,6 +17,7 @@ import com.suraj.bpms.project.repository.TaskRepository;
 import com.suraj.bpms.project.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -31,20 +32,32 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
 
 
-    public List<NotificationResponseDTO> getAllNotification(){
-        return notificationRepository.findAll()
+    public List<NotificationResponseDTO> getAllNotification(Long userId){
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(notificationMapper::toNotificationResponseDTO)
                 .toList();
     }
 
-    public NotificationResponseDTO getNotificationById(Long id){
-        Notification notification =  notificationRepository.findById(id)
+
+    public NotificationResponseDTO getNotificationById(Long id, Long userId){
+        Notification notification =  notificationRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(()-> new NotificationNotFoundException
                         ("Notification is not found with this id : "+ id));
 
         return notificationMapper.toNotificationResponseDTO(notification);
 
+    }
+
+    public void updateNotificationRead(Long id, Long userId){
+
+        Notification notification = notificationRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(()-> new NotificationNotFoundException
+                        ("Notification is not found with this id : "+ id));
+
+        notification.setIsRead(true);
+
+        notificationRepository.save(notification);
     }
 
     public NotificationResponseDTO createNotification(NotificationCreateDTO notificationCreateDTO){
@@ -74,5 +87,16 @@ public class NotificationService {
         return notificationMapper.toNotificationResponseDTO(savedNotification);
     }
 
+    public List<NotificationResponseDTO> getUnreadNotifications(Long userId){
+        return notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(notificationMapper::toNotificationResponseDTO)
+                .toList();
+    }
+
+    public Long countUnreadNotification(Long userId){
+
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
 
 }

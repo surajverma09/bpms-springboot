@@ -43,4 +43,6 @@ public class Notification {
     @Column(name = "created_at", updatable = false, nullable = false)
     private Timestamp createdAt;
 
+    @Column(name = "notification_type", nullable = false, length = 50)
+    private String notificationType;
 }
