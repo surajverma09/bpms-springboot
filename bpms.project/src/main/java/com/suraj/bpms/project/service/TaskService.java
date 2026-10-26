@@ -100,7 +100,7 @@ public class TaskService {
 
         String taskDetails = roleName + " " +  actionVerb.toLowerCase() + " task " + " #" + task.getId() + " for " + processName;
 
-        if(!task.getStatus().equals("PENDING")){
+        if("PENDING".equals(task.getStatus())){
             throw new InvalidTaskStatusException("Task has already been processed. Current status: " + task.getStatus());
 
         }
