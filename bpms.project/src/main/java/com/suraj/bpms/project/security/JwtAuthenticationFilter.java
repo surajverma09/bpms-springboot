@@ -60,8 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 securityContext.setAuthentication(authentication);
             }
 
-        }catch (JwtException | UsernameNotFoundException ignored){
-
+        }
+        catch (JwtException | UsernameNotFoundException ignored){
         }
 
             filterChain.doFilter(

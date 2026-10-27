@@ -27,4 +27,8 @@ public class AuthController {
                 loginReq.getPassword()
         );
     }
+//    @PostMapping("/register")
+//    public UserRegisterResponseDto RegisterAuth(
+//
+//    )
 }
