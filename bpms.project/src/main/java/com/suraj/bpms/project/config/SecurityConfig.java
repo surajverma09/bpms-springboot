@@ -41,6 +41,9 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth ->auth.requestMatchers
                         ("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/registration",
+                                "/api/registration/verify-otp").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

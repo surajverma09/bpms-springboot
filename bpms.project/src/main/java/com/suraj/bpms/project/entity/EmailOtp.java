@@ -1,6 +1,7 @@
 package com.suraj.bpms.project.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,4 +50,10 @@ public class EmailOtp {
             createdAt = LocalDateTime.now();
         }
     }
+
+    @Column(nullable = false)
+    private LocalDateTime lastSendAt;
+
+    @Column(nullable = false)
+    private int sendCount = 0;
 }

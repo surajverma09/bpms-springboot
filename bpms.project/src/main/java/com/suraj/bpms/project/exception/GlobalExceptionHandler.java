@@ -90,4 +90,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidTaskActionException(InvalidTaskActionException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<String> handleInvalidOtpException(InvalidOtpException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(
+            IllegalArgumentException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(OtpAttemptLimitException.class)
+    public ResponseEntity<String> handleOtpAttemptLimitException(
+            OtpAttemptLimitException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    @ExceptionHandler(OtpCooldownException.class)
+    public ResponseEntity<String> handleOtpCooldownException(
+            OtpCooldownException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
+    }
+    @ExceptionHandler(OtpSendLimitException .class)
+    public ResponseEntity<String> handleOtpSendLimitException (
+            OtpSendLimitException  ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
+    }
+
 }
