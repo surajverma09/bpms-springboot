@@ -20,15 +20,10 @@ public class AuthController {
     @PostMapping("/login")
     public UserLoginResponseDTO loginAuth(
             @Valid @RequestBody UserLoginRequestDTO loginReq){
-        System.out.println("LOGIN CONTROLLER REACHED");
-
+        
         return authService.authenticate(
                 loginReq.getEmail(),
                 loginReq.getPassword()
         );
     }
-//    @PostMapping("/register")
-//    public UserRegisterResponseDto RegisterAuth(
-//
-//    )
 }

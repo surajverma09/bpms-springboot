@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,10 +25,10 @@ public class ProcessDefinitionController {
         return processDefinitionService.getAllProcessDefinitions();
     }
 
-    @PostMapping("/{createdId}")
+    @PostMapping()
     public ResponseEntity<ApiResponse> createProcessDefinition(@Valid @RequestBody ProcessDefinitionCreateDTO processDefinitionCreateDTO,
-                                                               @PathVariable Long createdId){
-        processDefinitionService.createProcessDefinition(createdId, processDefinitionCreateDTO);
+                                                               Authentication authentication){
+        processDefinitionService.createProcessDefinition(authentication.getName(), processDefinitionCreateDTO);
 
         return new ResponseEntity<>(new ApiResponse("Process Definition is created successfully"), HttpStatus.CREATED);
     }

@@ -24,28 +24,57 @@ public class ProcessInstanceService {
     private final TaskRepository taskRepository;
 
 
-    public List<ProcessInstanceResponseDTO> getAllProcessInstances(){
-        return processInstanceRepository.findAll()
-                .stream()
-                .map(processInstanceMapper::toProcessInstanceResponse)
-                .toList();
+    public List<ProcessInstanceResponseDTO> getAllProcessInstances(String authenticatedEmail) {
+
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(() -> new UserNotFoundException
+                        ("User not found with this email : " + authenticatedEmail));
+
+        if ("ADMIN".equals(user.getRole().getName())) {
+            return processInstanceRepository.findAll()
+                    .stream()
+                    .map(processInstanceMapper::toProcessInstanceResponse)
+                    .toList();
+        }else{
+            return processInstanceRepository.findAllVisibleToUser(user.getId())
+                    .stream()
+                    .map(processInstanceMapper::toProcessInstanceResponse)
+                    .toList();
+        }
     }
 
 
+    public ProcessInstanceResponseDTO getProcessInstanceById(Long id, String authenticatedEmail) {
 
-    public ProcessInstanceResponseDTO getProcessInstanceById(Long id){
-        ProcessInstance processInstance =  processInstanceRepository.findById(id)
-                .orElseThrow(() -> new ProcessInstanceNotFoundException
-                        ("Process instance is not found with this id : " + id));
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(() -> new UserNotFoundException
+                        ("User not found with this email : " + authenticatedEmail));
 
-        return processInstanceMapper.toProcessInstanceResponse(processInstance);
+        if ("ADMIN".equals(user.getRole().getName())) {
+            ProcessInstance processInstance = processInstanceRepository.findById(id)
+                    .orElseThrow(() -> new ProcessInstanceNotFoundException
+                            ("Process instance is not found with this id : " + id));
+
+            return processInstanceMapper.toProcessInstanceResponse(processInstance);
+        }
+        else{
+            ProcessInstance processInstance = processInstanceRepository.findVisibleToUser(id, user.getId())
+                    .orElseThrow(()-> new ProcessInstanceNotFoundException
+                            ("Process instance is not found with this id : " + id));
+
+            return processInstanceMapper.toProcessInstanceResponse(processInstance);
+        }
     }
-
 
     @Transactional
     public ProcessInstanceResponseDTO createProcessInstance(Long processDefinitionId,
-                                                            Long userId,
+                                                            String authenticatedEmail,
                                                             ProcessInstanceCreateDTO processInstanceCreateDTO){
+
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(() -> new UserNotFoundException("User is not found with this email : " + authenticatedEmail));
+
+//        Long userId = user.getId();
 
         ProcessDefinition processDefinition = processDefinitionRepository.findById(processDefinitionId)
                 .orElseThrow(()-> new ProcessDefinitionNotFoundException
@@ -55,8 +84,6 @@ public class ProcessInstanceService {
                 .findFirstByProcessDefinitionIdOrderByStepOrderAsc(processDefinitionId)
                 .orElseThrow(()-> new ProcessDefinitionHasNoStepException("Process definition has no step"));
 
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(() -> new UserNotFoundException("User is not found with this id : " + userId));
 
 //        Role role = processDefinitionStep.getAssignedRole();
 

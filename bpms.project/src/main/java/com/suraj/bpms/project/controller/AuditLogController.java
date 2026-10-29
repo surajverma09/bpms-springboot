@@ -19,7 +19,7 @@ public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
-    @PostMapping
+    //Audit log POST endpoint is no longer useful due to auto generation by system
     public ResponseEntity<ApiResponse> createAuditLog(@Valid @RequestBody AuditLogCreateDTO auditLogCreateDTO){
         auditLogService.createAuditLog(auditLogCreateDTO);
         return new ResponseEntity<>(new ApiResponse("Audit log created successfully"), HttpStatus.CREATED);

@@ -4,6 +4,7 @@ import com.suraj.bpms.project.entity.EmailOtp;
 import com.suraj.bpms.project.exception.InvalidOtpException;
 import com.suraj.bpms.project.exception.OtpAttemptLimitException;
 import com.suraj.bpms.project.exception.OtpCooldownException;
+import com.suraj.bpms.project.exception.OtpSendLimitException;
 import com.suraj.bpms.project.repository.EmailOtpRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class EmailOtpService {
 
     public String generateOtp(){
         int otp = secureRandom.nextInt(1_000_000);
-            return String.format("%06d",otp);
+            return String.format(Locale.ROOT,"%06d",otp);
     }
 
     public String hashOtp(String email, String otp) {
@@ -94,7 +95,7 @@ public class EmailOtpService {
         }
         else{
             if(emailOtp.getSendCount() >= 3){
-                throw new IllegalStateException("OTP request limit reached. Please try again later ");
+                throw new OtpSendLimitException("OTP request limit reached. Please try again later ");
             }else{
                 emailOtp.setSendCount(emailOtp.getSendCount() + 1);
             }
@@ -124,7 +125,7 @@ public class EmailOtpService {
 
         emailOtpRepository.findByEmail(email).ifPresent(
                 otpRecord -> {otpRecord.setExpiresAt(
-                        LocalDateTime.now().minusMinutes(1));
+                        now.minusMinutes(1));
 
                     emailOtpRepository.save(otpRecord);
         }

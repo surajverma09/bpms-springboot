@@ -31,19 +31,19 @@ public class ProcessDefinitionService {
                 .toList();
     }
 
-    public ProcessDefinitionResponseDTO createProcessDefinition(Long createdId,
+    public ProcessDefinitionResponseDTO createProcessDefinition(String authenticatedEmail,
                                            ProcessDefinitionCreateDTO processDefinitionCreateDTO ) {
+
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email " + authenticatedEmail));
 
         ProcessDefinition processDefinition = processDefinitionMapper.
                 toProcessDefinitionEntity(processDefinitionCreateDTO);
 
-        User user = userRepository.findByIdAndIsDeletedFalse(createdId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id " + createdId));
-
         Optional<ProcessDefinition> latestProcessDefinition =
                 processDefinitionRepository.findFirstByNameIgnoreCaseOrderByVersionDesc(processDefinition.getName());
 
-        Integer nextVersion = 0;
+        int nextVersion = 0;
         if(latestProcessDefinition.isPresent()){
             ProcessDefinition latest = latestProcessDefinition.get();
             Integer existingVersion = latest.getVersion();

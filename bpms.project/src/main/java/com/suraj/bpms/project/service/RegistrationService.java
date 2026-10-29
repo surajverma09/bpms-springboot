@@ -59,11 +59,10 @@ public class RegistrationService {
         pr.setExpireAt(currentTime.plusMinutes(15));
         pr.setCreatedAt(currentTime);
 
-        pendingRegistrationRepository.save(pr);
-
         String otp = emailOtpService.createAndSaveOtp(email);
 
         try{
+            pendingRegistrationRepository.save(pr);
             emailService.sendOtpEmail(email, otp);
         }catch (Exception e){
             emailOtpService.invalidateOtp(email);

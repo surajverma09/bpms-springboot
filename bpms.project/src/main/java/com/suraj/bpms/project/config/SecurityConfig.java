@@ -2,6 +2,7 @@ package com.suraj.bpms.project.config;
 
 import com.suraj.bpms.project.security.JwtAuthenticationFilter;
 import com.suraj.bpms.project.service.CustomUserDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,8 +31,11 @@ public class SecurityConfig {
                                                    DaoAuthenticationProvider authenticationProvider,
                                                    JwtAuthenticationFilter jwtFilter)
             throws Exception{
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(
+                csrf -> csrf.disable())
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -39,12 +43,62 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider)
 
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"message\":\"Unauthorized\"}"
+                            );
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"message\":\"Forbidden\"}"
+                            );
+                        })
+                )
+
+
                 .authorizeHttpRequests(auth ->auth.requestMatchers
                         ("/api/auth/**").permitAll()
+
                         .requestMatchers(HttpMethod.POST,
                                 "/api/registration",
                                 "/api/registration/verify-otp").permitAll()
+
+                        .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/roles", "/api/roles/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST,"/api/process-definition",
+                                "/api/process-definition/**").hasAnyRole("ADMIN", "MANAGER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/process-definition",
+                                "/api/process-definition/**").hasAnyRole("ADMIN", "MANAGER", "HR", "FINANCE")
+
+                        .requestMatchers(HttpMethod.POST, "/api/process-instance",
+                                "/api/process-instance/**" ).hasAnyRole("ADMIN", "MANAGER", "HR", "FINANCE","EMPLOYEE")
+
+                        .requestMatchers(HttpMethod.GET, "/api/process-instance",
+                                "/api/process-instance/**").hasAnyRole("ADMIN", "MANAGER", "HR", "FINANCE", "EMPLOYEE")
+
+                        .requestMatchers(HttpMethod.GET, "/api/process-step",
+                                "/api/process-step/**").hasAnyRole("ADMIN", "MANAGER", "HR", "FINANCE")
+
+                        .requestMatchers(HttpMethod.POST, "/api/process-step",
+                                "/api/process-step/**").hasAnyRole("ADMIN", "MANAGER")
+
+                        .requestMatchers("/api/audit-log", "/api/audit-log/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers("/api/users" , "/api/users/**")
+                        .hasRole("ADMIN")
+
+
                         .anyRequest().authenticated());
+
         return http.build();
     }
 

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,21 +24,27 @@ public class ProcessInstanceController {
 
 
     @GetMapping
-    public List<ProcessInstanceResponseDTO> getAllProcessInstances(){
-        return processInstanceService.getAllProcessInstances();
+    public List<ProcessInstanceResponseDTO> getAllProcessInstances(Authentication authentication){
+        return processInstanceService.getAllProcessInstances(authentication.getName());
     }
 
     @GetMapping("/{id}")
-    public ProcessInstanceResponseDTO getProcessInstance(@PathVariable Long id){
-         return processInstanceService.getProcessInstanceById(id);
+    public ProcessInstanceResponseDTO getProcessInstance(@PathVariable Long id,
+                                                         Authentication authentication){
+         return processInstanceService.getProcessInstanceById(id, authentication.getName());
     }
 
-    @PostMapping("/{processDefinitionId}/{userId}")
-    public ResponseEntity<ApiResponse> createProcessInstance(@PathVariable Long processDefinitionId,
-                                                             @PathVariable Long userId,
+    @PostMapping("/{processDefinitionId}")
+    public ResponseEntity<ApiResponse> createProcessInstance
+                                                            (@PathVariable Long processDefinitionId,
+                                                             Authentication authentication,
                                                              @Valid @RequestBody ProcessInstanceCreateDTO processInstanceCreateDTO){
-        processInstanceService.createProcessInstance(processDefinitionId, userId, processInstanceCreateDTO);
+        processInstanceService.createProcessInstance
+                (processDefinitionId,
+                        authentication.getName(),
+                        processInstanceCreateDTO);
 
-        return new ResponseEntity<>(new ApiResponse("Process instance is created successfully"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ApiResponse
+                    ("Process instance is created successfully"), HttpStatus.CREATED);
     }
 }

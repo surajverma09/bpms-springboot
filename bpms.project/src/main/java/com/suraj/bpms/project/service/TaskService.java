@@ -32,19 +32,42 @@ public class TaskService {
     private static final String PROCESS_REJECTED = "PROCESS_INSTANCE_REJECTED";
     private static final String PROCESS_COMPLETED = "PROCESS_INSTANCE_COMPLETED"  ;
 
-    public List<TaskResponseDTO> getAllTask(){
-        return taskRepository.findAll()
-                .stream()
-                .map(taskMapper::toTaskResponseDTO)
-                .toList();
+    public List<TaskResponseDTO> getAllTask(String authenticatedEmail){
+
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(()-> new UserNotFoundException("User not found by this email : " + authenticatedEmail));
+
+        if("ADMIN".equals(user.getRole().getName())){
+            return taskRepository.findAll()
+                    .stream()
+                    .map(taskMapper::toTaskResponseDTO)
+                    .toList();
+        }
+        else{
+            return taskRepository.findAllByAssignedToUserId(user.getId()).stream()
+                    .map(taskMapper::toTaskResponseDTO).toList();
+        }
     }
 
 
-    public TaskResponseDTO getTaskById(Long id){
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + id));
+    public TaskResponseDTO getTaskById(Long id, String authenticatedEmail){
 
-        return taskMapper.toTaskResponseDTO(task);
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(()-> new UserNotFoundException("User not found by this email : " + authenticatedEmail));
+
+        if("ADMIN".equals(user.getRole().getName())){
+
+            Task task = taskRepository.findById(id)
+                    .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + id));
+
+            return taskMapper.toTaskResponseDTO(task);
+
+        } else {
+            Task task = taskRepository.findByIdAndAssignedToUserId(id, user.getId())
+                    .orElseThrow(()->new TaskNotFoundException("Task is not found with this id : " + id));
+
+            return taskMapper.toTaskResponseDTO(task);
+        }
     }
 
     private void recordTaskAction(Task task, Long userId, TaskActionType actionType, String comment){
@@ -80,14 +103,20 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponseDTO approveOrReject(Long taskId, Long userId,
+    public TaskResponseDTO approveOrReject(Long taskId, String authenticatedEmail   ,
                                 TaskActionType typeAction, String comment){
+
+        if(typeAction == null){
+            throw new InvalidTaskActionException("Task action can't be null");
+        }
 
         Task task = taskRepository.findByIdForUpdate(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task is not found with this id : " + taskId));
 
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(()-> new UserNotFoundException("User is not found with this id : " + userId));
+        User user = userRepository.findByEmailAndIsDeletedFalse(authenticatedEmail)
+                .orElseThrow(()-> new UserNotFoundException("User is not found with this email : " + authenticatedEmail));
+
+        Long userId = user.getId();
 
         Role role = user.getRole();
 
@@ -99,15 +128,12 @@ public class TaskService {
 
         String taskDetails = roleName + " " +  actionVerb.toLowerCase() + " task " + " #" + task.getId() + " for " + processName;
 
-        if("PENDING".equals(task.getStatus())){
+        if(!"PENDING".equals(task.getStatus())){
             throw new InvalidTaskStatusException("Task has already been processed. Current status: " + task.getStatus());
 
         }
         if(!task.getAssignedToUser().getId().equals(userId)){
             throw new UnauthorizedUserFoundException("User is not authorized to perform this task action");
-        }
-        if(typeAction == null){
-            throw new InvalidTaskActionException("Task action can't be null");
         }
 
         if (typeAction == TaskActionType.REJECT) {
