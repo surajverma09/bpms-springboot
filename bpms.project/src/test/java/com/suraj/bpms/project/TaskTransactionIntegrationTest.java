@@ -8,12 +8,15 @@ import com.suraj.bpms.project.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
 import java.util.List;
 import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Import(TestMailConfiguration.class)
 public class TaskTransactionIntegrationTest {
 
     @Autowired
@@ -101,13 +104,13 @@ public class TaskTransactionIntegrationTest {
         currentTask = taskRepository.save(currentTask);
 
         Long taskId = currentTask.getId();
-        Long managerId = manager.getId();
+        String managerEmail = manager.getEmail();
 
         assertThrows(
                 NoEligibleUserIsFoundException.class,
                 () -> taskService.approveOrReject(
                         taskId,
-                        managerId,
+                        managerEmail,
                         TaskActionType.APPROVE, null
                 )
         );
@@ -196,6 +199,7 @@ public class TaskTransactionIntegrationTest {
 
         Long taskId = task.getId();
         Long managerId = manager.getId();
+        String managerEmail = manager.getEmail();
 
         Long processInstanceId = processInstance.getId();
         Long financeStepId = financeStep.getId();
@@ -213,7 +217,7 @@ public class TaskTransactionIntegrationTest {
             try{
                 taskService.approveOrReject(
                         taskId,
-                        managerId,
+                        managerEmail,
                         TaskActionType.APPROVE,
                         null
                 );

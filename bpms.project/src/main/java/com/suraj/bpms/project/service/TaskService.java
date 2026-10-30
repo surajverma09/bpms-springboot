@@ -71,6 +71,7 @@ public class TaskService {
     }
 
     private void recordTaskAction(Task task, Long userId, TaskActionType actionType, String comment){
+
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(()-> new UserNotFoundException("User is not found with this id : " + userId));
 
@@ -130,8 +131,9 @@ public class TaskService {
 
         if(!"PENDING".equals(task.getStatus())){
             throw new InvalidTaskStatusException("Task has already been processed. Current status: " + task.getStatus());
-
         }
+
+
         if(!task.getAssignedToUser().getId().equals(userId)){
             throw new UnauthorizedUserFoundException("User is not authorized to perform this task action");
         }
@@ -150,10 +152,13 @@ public class TaskService {
             taskRepository.save(task);
 
             recordTaskAction(task, userId, typeAction,comment);
+
             recordAuditLog(userId, TASK_REJECTED,"TASK",
                     task.getId(), taskDetails);
+
             recordAuditLog(userId, PROCESS_REJECTED,"PROCESS_INSTANCE",
                     task.getProcessInstance().getId(), processDetails);
+            
             return taskMapper.toTaskResponseDTO(task);
         }
 

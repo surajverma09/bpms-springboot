@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,17 +29,15 @@ public class TaskServiceTest {
     @Mock
     TaskRepository taskRepository;
     @Mock
-    TaskMapper taskMapper;
-    @Mock
     UserRepository userRepository;
     @Mock
     ProcessStepRepository processStepRepository;
     @Mock
     TaskActionRepository taskActionRepository;
     @Mock
-    RoleRepository roleRepository;
-    @Mock
     private AuditLogService auditLogService;
+    @Mock
+    private TaskMapper taskMapper;
 
 
     @InjectMocks
@@ -62,23 +61,24 @@ public class TaskServiceTest {
             task.setProcessInstance(processInstance);
 
             User user = new User();
+
+
             Role role = new Role();
+            role.setName("HR");
 
-            role.setName("MANAGER");
-            user.setId(10L);
+
             user.setRole(role);
-
 
             when(taskRepository.findByIdForUpdate(21L)).
                     thenReturn(Optional.of(task));
 
-            when(userRepository.findByIdAndIsDeletedFalse(10L))
+            when(userRepository.findByEmailAndIsDeletedFalse("hr@gmail.com"))
                     .thenReturn(Optional.of(user));
 
             assertThrows(
                     InvalidTaskStatusException.class,
                     ()->taskService.approveOrReject(
-                            21L,10l, TaskActionType.APPROVE,null
+                            21L,"hr@gmail.com", TaskActionType.APPROVE,null
                     )
             );
         }
@@ -90,6 +90,7 @@ public class TaskServiceTest {
 
         task.setStatus("PENDING");
         user.setId(10L);
+        user.setEmail("manager@gmail.com");
         task.setAssignedToUser(user);
 
         ProcessDefinition processDefinition = new ProcessDefinition();
@@ -103,17 +104,18 @@ public class TaskServiceTest {
         role.setName("EMPLOYEE");
 
         User requestingUser = new User();
+        requestingUser.setEmail("manager@gmail.com");
         requestingUser.setId(20L);
         requestingUser.setRole(role);
 
-        when(userRepository.findByIdAndIsDeletedFalse(20L))
+        when(userRepository.findByEmailAndIsDeletedFalse("manager@gmail.com"))
                 .thenReturn(Optional.of(requestingUser));
 
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         assertThrows(UnauthorizedUserFoundException.class,
                 ()->taskService.approveOrReject
-                        (21L, 20L, TaskActionType.APPROVE, null));
+                        (21L, "manager@gmail.com", TaskActionType.APPROVE, null));
     }
 
     @Test //test -> 3
@@ -122,7 +124,7 @@ public class TaskServiceTest {
         when(taskRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
         assertThrows(TaskNotFoundException.class,()-> taskService.approveOrReject
-                (99L, 10L, TaskActionType.APPROVE, null));
+                (99L, "hr@gmail.com", TaskActionType.APPROVE, null));
     }
 
     @Test //test -> 4
@@ -133,13 +135,14 @@ public class TaskServiceTest {
         role.setName("MANAGER");
         user.setRole(role);
 
-        when(userRepository.findByIdAndIsDeletedFalse(10L))
-                .thenReturn(Optional.of(user));
+//        when(userRepository.findByEmailAndIsDeletedFalse("manager@gmail.com"))
+//                .thenReturn(Optional.of(user));
 
 
         Task task = new Task();
         task.setStatus("PENDING");
         user.setId(10L);
+        user.setEmail("manager@gmail.com");
         task.setAssignedToUser(user);
         ProcessDefinition processDefinition = new ProcessDefinition();
         processDefinition.setName("Leave Application");
@@ -148,10 +151,10 @@ public class TaskServiceTest {
         processInstance.setProcessDefinition(processDefinition);
 
         task.setProcessInstance(processInstance);
-        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
+//        when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
         assertThrows(InvalidTaskActionException.class,()->
-                taskService.approveOrReject(21L, 10L, null, null));
+                taskService.approveOrReject(21L, "manager@gmail.com", null, null));
     }
 
     @Test //test -> 5
@@ -169,6 +172,7 @@ public class TaskServiceTest {
         processInstance.setProcessDefinition(processDefinition);
 
         user.setId(10L);
+        user.setEmail("manager@gmail.com");
         user.setRole(role);
         role.setName("MANAGER");
 
@@ -177,12 +181,16 @@ public class TaskServiceTest {
         task.setAssignedToUser(user);
         task.setStatus("PENDING");
 
-        when(userRepository.findByIdAndIsDeletedFalse(10L))
+        when(userRepository.findByEmailAndIsDeletedFalse("manager@gmail.com"))
                 .thenReturn(Optional.of(user));
+
+
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
 
+        when(userRepository.findByIdAndIsDeletedFalse(10L)).thenReturn(Optional.of(user));
 
-        taskService.approveOrReject(21L, 10L, TaskActionType.REJECT, null);
+
+        taskService.approveOrReject(21L, "manager@gmail.com", TaskActionType.REJECT, null);
 
         ArgumentCaptor<TaskAction> captor = ArgumentCaptor.forClass(TaskAction.class);
 
@@ -231,6 +239,11 @@ public class TaskServiceTest {
         when(userRepository.findByIdAndIsDeletedFalse(10L))
                 .thenReturn(Optional.of(user));
 
+
+        when(userRepository.findByEmailAndIsDeletedFalse("manager@gmail.com"))
+                .thenReturn(Optional.of(user));
+
+
         processStep.setProcessDefinition(processDefinition);
         processStep.setStepOrder(3);
         processInstance.setStatus("RUNNING");
@@ -238,17 +251,19 @@ public class TaskServiceTest {
         task.setProcessInstance(processInstance);
         task.setProcessStep(processStep);
         user.setId(10L);
+        user.setEmail("manager@gmail.com");
         task.setAssignedToUser(user);
         task.setId(21L);
         processInstance.setId(100L);
 
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
+
         when(processStepRepository
                 .findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc
                         (processDefinition.getId(),processStep.getStepOrder()))
                 .thenReturn(Optional.empty());
 
-        taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE, null);
+        taskService.approveOrReject(21L, "manager@gmail.com", TaskActionType.APPROVE, null);
 
         ArgumentCaptor<TaskAction> captor = ArgumentCaptor.forClass(TaskAction.class);
 
@@ -297,7 +312,11 @@ public class TaskServiceTest {
         when(userRepository.findByIdAndIsDeletedFalse(10L))
                 .thenReturn(Optional.of(currentUser));
 
+        when(userRepository.findByEmailAndIsDeletedFalse("manager@gmail.com"))
+                .thenReturn(Optional.of(currentUser));
+
         currentUser.setId(10L);
+        currentUser.setEmail("manager@gmail.com");
         nextUser.setId(3L);
         task.setAssignedToUser(currentUser);
         currentStep.setStepOrder(1);
@@ -328,7 +347,7 @@ public class TaskServiceTest {
         when(taskRepository.countByAssignedToUserIdAndStatus(nextUser.getId(),"PENDING"))
                 .thenReturn(2L);
 
-        taskService.approveOrReject(21L, 10L, TaskActionType.APPROVE, null);
+        taskService.approveOrReject(21L, "manager@gmail.com", TaskActionType.APPROVE, null);
 
         assertEquals("APPROVED", task.getStatus());
         assertEquals("RUNNING", processInstance.getStatus());
@@ -362,6 +381,7 @@ public class TaskServiceTest {
         Role financeRole = new Role();
 
         currentUser.setId(10L);
+        currentUser.setEmail("manager@gmail.com");
         processDefinition.setId(1L);
         currentStep.setStepOrder(1);
         nextStep.setStepOrder(2);
@@ -381,10 +401,11 @@ public class TaskServiceTest {
 
         task.setAssignedToUser(currentUser);
 
-        when(userRepository.findByIdAndIsDeletedFalse(10L))
+        when(userRepository.findByEmailAndIsDeletedFalse("manager@gmail.com"))
                 .thenReturn(Optional.of(currentUser));
 
         when(taskRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(task));
+
         when(processStepRepository.
                 findFirstByProcessDefinitionIdAndStepOrderGreaterThanOrderByStepOrderAsc
                         (processDefinition.getId(), currentStep.getStepOrder()))
@@ -393,7 +414,7 @@ public class TaskServiceTest {
                 .thenReturn(List.of());
 
         assertThrows(NoEligibleUserIsFoundException.class, ()-> taskService
-                .approveOrReject(21L, 10L, TaskActionType.APPROVE, null));
+                .approveOrReject(21L, "manager@gmail.com", TaskActionType.APPROVE, null));
         assertEquals("PENDING", task.getStatus());
         assertEquals("RUNNING", processInstance.getStatus());
     }

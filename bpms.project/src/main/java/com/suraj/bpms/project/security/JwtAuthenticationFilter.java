@@ -61,7 +61,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 securityContext.setAuthentication(authentication);
             }
-
         }
         catch (JwtException | UsernameNotFoundException ignored) {
         }
